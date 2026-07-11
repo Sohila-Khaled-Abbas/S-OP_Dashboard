@@ -17,11 +17,7 @@
 - **[FactPromotionCoverage](#factpromotioncoverage)** (Fact) — 2 Columns, 0 Measures
 - **[FactSales](#factsales)** (Fact) — 13 Columns, 0 Measures
 - **[FactSalesTargets](#factsalestargets)** (Fact) — 2 Columns, 0 Measures
-<<<<<<< HEAD
 - **[KeyMeasures](#keymeasures)** (Fact) — 0 Columns, 30 Measures
-=======
-- **[Measures](#measures)** (Fact) — 0 Columns, 30 Measures
->>>>>>> 7d8bf988f58885ebc05541a1ca0fb34e8fed09d3
 - **[Security](#security)** (Fact) — 2 Columns, 0 Measures
 
 ---
@@ -234,11 +230,7 @@
 
 ---
 
-<<<<<<< HEAD
 ## KeyMeasures
-=======
-## Measures
->>>>>>> 7d8bf988f58885ebc05541a1ca0fb34e8fed09d3
 *Type: `Fact`*
 
 ### Columns
