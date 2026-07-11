@@ -44,3 +44,7 @@ ref table DimDate
 
 ref cultureInfo en-US
 
+ref role 'Regional Sales Rep'
+ref role 'Executive'
+ref role 'Admin'
+

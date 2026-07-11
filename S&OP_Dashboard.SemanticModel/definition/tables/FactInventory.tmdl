@@ -39,18 +39,20 @@ table FactInventory
 		source =
 				let
 				    Source = inventory,
+				    // Promote headers first, then IMMEDIATELY unpivot all non-identity columns.
+				    // This removes the hardcoded year-month column list so new years (2026+)
+				    // are automatically picked up without any M code changes.
 				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductName", type text}, {"2025-01", Int64.Type}, {"2025-02", Int64.Type}, {"2025-03", Int64.Type}, {"2025-04", Int64.Type}, {"2025-05", Int64.Type}, {"2025-06", Int64.Type}, {"2025-07", Int64.Type}, {"2025-08", Int64.Type}, {"2025-09", Int64.Type}, {"2025-10", Int64.Type}, {"2025-11", Int64.Type}, {"2025-12", Int64.Type}}),
-				    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"ProductName"}, "Attribute", "Value"),
-				    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}}),
-				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"YearMonth", type date}}),
-				    #"Merged Queries" = Table.NestedJoin(#"Changed Type1", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
+				    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Promoted Headers", {"ProductName"}, "Attribute", "Value"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}, {"Value", "Units"}}),
+				    // Cast types AFTER unpivot — YearMonth and Units are now single columns, no hardcoding needed
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"ProductName", type text}, {"YearMonth", type date}, {"Units", Int64.Type}}),
+				    #"Merged Queries" = Table.NestedJoin(#"Changed Type", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
 				    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
-				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Value"}),
-				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"}),
-				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Value", "Units"}})
+				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Units"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"})
 				in
-				    #"Renamed Columns1"
+				    #"Removed Columns"
 
 	annotation PBI_NavigationStepName = Navigation
 
