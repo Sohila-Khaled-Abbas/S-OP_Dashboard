@@ -81,7 +81,3 @@ relationship 16e8a4a3-230b-a35a-0117-85c02f1b8188
 	fromColumn: DimCustomer.City
 	toColumn: DimGeo.City
 
-// Security table relationships intentionally removed.
-// RLS is enforced via DAX USERPRINCIPALNAME() in the Security table.
-// Physical relationships caused unpredictable many-to-many filter chains.
-
