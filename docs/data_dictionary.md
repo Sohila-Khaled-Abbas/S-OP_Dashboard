@@ -43,8 +43,6 @@
 | `FactInventory` | `YearMonth` | `──►` | `DimDate` | `Date` |
 | `DimDate` | `Date` | `──►` | `FactSalesTargets` | `Period` |
 | `DimCustomer` | `City` | `──(inactive)──►` | `DimGeo` | `City` |
-| `DimCustomer` | `Region` | `──►` | `Security` | `Region` |
-| `DimGeo` | `Region` | `──(inactive)──►` | `Security` | `Region` |
 
 ---
 
