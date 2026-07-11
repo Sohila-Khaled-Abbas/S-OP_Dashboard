@@ -1,15 +1,9 @@
 role 'Regional Sales Rep'
 	modelPermission: read
 
-	tablePermission DimCustomer = [Region] = LOOKUPVALUE(
-	    Security[Region],
-	    Security[UserEmail], USERPRINCIPALNAME()
-	)
+	tablePermission DimCustomer = [Region] = LOOKUPVALUE(Security[Region], Security[UserEmail], USERPRINCIPALNAME())
 
-	tablePermission DimGeo = [Region] = LOOKUPVALUE(
-	    Security[Region],
-	    Security[UserEmail], USERPRINCIPALNAME()
-	)
+	tablePermission DimGeo = [Region] = LOOKUPVALUE(Security[Region], Security[UserEmail], USERPRINCIPALNAME())
 
 role 'Executive'
 	modelPermission: read

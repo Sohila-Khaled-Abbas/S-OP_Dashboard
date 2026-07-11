@@ -41,6 +41,7 @@ ref table FactOrderFulfillment
 ref table FactSalesTargets
 ref table Security
 ref table DimDate
+ref table Measures
 
 ref cultureInfo en-US
 
