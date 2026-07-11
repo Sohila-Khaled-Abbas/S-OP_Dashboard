@@ -8,7 +8,7 @@ This document bridges the gap between technical schemas and business operations.
 
 Our S&OP dashboard integrates several data streams (Sales, Inventory, Campaigns, Logistics) to synchronize supply and demand.
 
-![S&OP Data Pipeline Infographic](images/sop_dashboard_infographic.png)
+![S&OP Data Pipeline Infographic](images/sop_architecture_final.png)
 
 ---
 

@@ -1,4 +1,4 @@
-table Measures
+table KeyMeasures
 	lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 	measure 'Total Sales' = SUM(FactSales[LineTotal])
@@ -243,7 +243,7 @@ table Measures
 		displayFolder: 07_Dynamic & Context
 		lineageTag: a6b7c8d9-e0f1-2345-abcd-ef678901e0e1
 
-	partition Measures = calculated
+	partition KeyMeasures = calculated
 		mode: import
 		source = {(BLANK())}
 

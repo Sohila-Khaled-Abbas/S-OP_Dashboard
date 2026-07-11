@@ -139,8 +139,9 @@ cd "Omnichannel Sales & Operations (S&OP) Dashboard"
 
 To support development and business alignment, this repository includes an advanced documentation suite and automated parsing pipeline:
 
-*   **[S&OP Business Workflow Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/sop_workflow.md):** Connects S&OP planning phases (Demand, Supply, Finance) with specific tables in our model, featuring our modern Draw.io-style architecture flowchart.
-*   **[DAX & Modeling Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/dax_and_modeling.md):** Detailed standards for DAX calculations, including formula templates for key business metrics (e.g. OTIF %, Days of Inventory Cover, Sales vs Target Variance).
+*   **[S&OP Business Workflow Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/sop_workflow.md):** Connects S&OP planning phases (Demand, Supply, Finance) with specific tables in our model, featuring our modern Draw.io-style architecture flowchart (`docs/images/sop_architecture_final.png`).
+*   **[DAX & Modeling Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/dax_and_modeling.md):** Detailed standards for DAX calculations, including formula templates for our 28 metrics in the `KeyMeasures` table and dynamic disconnected RLS.
+*   **[Report & Visualization Design Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/report_development_guide.md):** Layout templates, visual hierarchies, and color schemes for all 5 core dashboard report pages.
 *   **[Automated Data Dictionary](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/data_dictionary.md):** A structured data catalog listing all tables, fields, data types, and relationships (updated dynamically).
 
 ### 🤖 Documentation Automation (CI/CD)
@@ -152,6 +153,12 @@ To execute the parser locally:
 ```bash
 python scripts/generate_data_dictionary.py
 ```
+
+### ⚡ Power BI Modeling MCP Server Integration
+This project integrates the official Microsoft **Power BI Modeling MCP Server** at the workspace level.
+*   The configuration is saved in `.agents/mcp_config.json`.
+*   This server enables AI coding agents (such as Antigravity) to query DAX, edit measures, rename columns, and perform modeling operations directly on the semantic model using natural language via the local PBIP files or a live Desktop/Fabric instance.
+
 
 ---
 
