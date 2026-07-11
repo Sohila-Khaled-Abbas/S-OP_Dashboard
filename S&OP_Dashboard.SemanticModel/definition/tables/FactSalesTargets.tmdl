@@ -1,0 +1,38 @@
+table FactSalesTargets
+	lineageTag: 5a6adfae-72f4-4e6b-a342-82e5cc140d51
+
+	column Period
+		dataType: dateTime
+		formatString: mmmm yyyy
+		lineageTag: 37a87fab-5f11-4445-834e-b06039eb1ece
+		summarizeBy: none
+		sourceColumn: Period
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column TargetRevenue
+		dataType: int64
+		formatString: 0
+		lineageTag: b25c2f8f-8a21-4dd0-8f0d-929ece760570
+		summarizeBy: sum
+		sourceColumn: TargetRevenue
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactSalesTargets = m
+		mode: import
+		queryGroup: 03_Facts
+		source =
+				let
+				    Source = sales_targets
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,46 @@
+table DimGeo
+	lineageTag: 0df4cd71-0785-4cbe-bfb3-ace1c651e0b9
+
+	column GeoKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 720cd411-1379-4fe1-bf1b-c4bb89f778b0
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: GeoKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 04dadaba-1105-4f06-8da8-f1ecf9d7d6b9
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: af0d8aee-dbe8-41de-8559-5cbb2a37f506
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimGeo = m
+		mode: import
+		queryGroup: 02_Dimensions
+		source =
+				let
+				    Source = cities,
+				    #"Removed Duplicates" = Table.Distinct(Source),
+				    #"Added Index" = Table.AddIndexColumn(#"Removed Duplicates", "Index", 1, 1, Int64.Type),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Added Index",{"Index", "CityName", "RegionName"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Index", "GeoKey"}, {"CityName", "City"}, {"RegionName", "Region"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

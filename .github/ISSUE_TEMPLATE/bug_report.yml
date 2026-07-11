@@ -1,0 +1,62 @@
+name: "🐛 Bug Report"
+description: File a bug report to help us improve the dashboard.
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thank you for filing a bug report!
+        Please fill out this form to help us resolve the issue with the S&OP dashboard as quickly as possible.
+  - type: input
+    id: page
+    attributes:
+      label: "Report Page Name"
+      description: "Specify which report page has the issue."
+      placeholder: "e.g., Sales Performance, Inventory Optimization, Order Fulfillment"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Bug Description"
+      description: "A clear and concise description of what the bug is."
+      placeholder: "e.g., The 'OTIF %' measure displays infinity when total shipments are zero."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce"
+      description: "How can we reproduce the bug?"
+      value: |
+        1. Open the 'S&OP_Dashboard.pbip' file.
+        2. Go to the page '...'
+        3. Filter by slicer '...'
+        4. See incorrect behavior in visual '...'
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: "Power BI Desktop Version"
+      description: "Which version of Power BI Desktop are you running?"
+      options:
+        - "Latest Release"
+        - "Previous Month Release"
+        - "Older Version (specify in Additional Details)"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Behavior"
+      description: "What did you expect to see?"
+      placeholder: "e.g., The OTIF % card should show 0% instead of infinity."
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Additional Details"
+      description: "Any other details such as data refresh lag, DAX query times, or staging path warnings."

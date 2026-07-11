@@ -1,0 +1,93 @@
+relationship 79955cb1-6507-a07e-c220-b47283ff2ee2
+	fromColumn: FactSales.FlagKey
+	toColumn: DimOrderFlags.FlagKey
+
+relationship e650dafa-6ece-d86c-4663-5e14e894fb4b
+	fromColumn: FactSales.CustomerID
+	toColumn: DimCustomer.CustomerID
+
+relationship 36baa9cf-915b-f9be-685b-8333a199576e
+	fromColumn: FactSales.ProductKey
+	toColumn: DimProduct.ProductKey
+
+relationship 41458990-738f-b9de-56cf-367fd373f5de
+	fromColumn: FactSales.BillToCityKey
+	toColumn: DimGeo.GeoKey
+
+relationship 6b83ff2c-e36a-cb6b-420a-f33b8bc6233f
+	isActive: false
+	fromColumn: FactSales.ShipToCityKey
+	toColumn: DimGeo.GeoKey
+
+relationship e942cf55-f6e6-7233-f03e-151cc99cdb02
+	fromColumn: FactInventory.ProductKey
+	toColumn: DimProduct.ProductKey
+
+relationship 8c471037-07c1-5c98-dac6-58e53b02a304
+	fromColumn: FactCampaignSpend.CampaignKey
+	toColumn: DimCampaign.CampaignKey
+
+relationship 1fe06857-8fe3-88ff-d34b-f4f22dae29af
+	fromColumn: FactPromotionCoverage.CampaignKey
+	toColumn: DimCampaign.CampaignKey
+
+relationship d3b8bdbb-ebde-9110-d56c-3bbb75da3851
+	fromColumn: FactPromotionCoverage.ProductKey
+	toColumn: DimProduct.ProductKey
+
+relationship 9b8ef54b-73e0-d75c-6aa4-c3637bf8aa06
+	fromColumn: FactOrderFulfillment.CustomerID
+	toColumn: DimCustomer.CustomerID
+
+relationship 50822ba5-c784-1796-88e0-ec87e1ce233d
+	fromColumn: FactSales.OrderDate
+	toColumn: DimDate.Date
+
+relationship bbd8aa6c-5e50-d34c-9622-0a8442847eba
+	fromColumn: FactOrderFulfillment.OrderDate
+	toColumn: DimDate.Date
+
+relationship dc0beaa9-2049-beee-3b81-ce379e4e1a36
+	isActive: false
+	fromColumn: FactOrderFulfillment.DeliveryDate
+	toColumn: DimDate.Date
+
+relationship f5172d74-1e95-b7dd-0dd2-b60f558f5976
+	isActive: false
+	fromColumn: FactOrderFulfillment.InvoiceDate
+	toColumn: DimDate.Date
+
+relationship 786c8cb1-cc92-f192-91e6-6af950d3d5de
+	isActive: false
+	fromColumn: FactOrderFulfillment.ShipDate
+	toColumn: DimDate.Date
+
+relationship 2bd10ce1-c738-2324-93c6-0373b1f794b5
+	isActive: false
+	fromColumn: FactOrderFulfillment.PayDate
+	toColumn: DimDate.Date
+
+relationship 948cfc52-0d77-3c10-6b2e-36674d6f0a97
+	fromColumn: FactInventory.YearMonth
+	toColumn: DimDate.Date
+
+relationship f0c93f68-3f6d-c5ce-69d8-234572cf47a5
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: DimDate.Date
+	toColumn: FactSalesTargets.Period
+
+relationship 16e8a4a3-230b-a35a-0117-85c02f1b8188
+	isActive: false
+	fromColumn: DimCustomer.City
+	toColumn: DimGeo.City
+
+relationship f60fd889-2543-da30-ea36-7253b7c57d69
+	fromColumn: DimCustomer.Region
+	toColumn: Security.Region
+
+relationship 4ea9a23f-0b80-b249-5576-f9153d870c27
+	isActive: false
+	fromColumn: DimGeo.Region
+	toColumn: Security.Region
+

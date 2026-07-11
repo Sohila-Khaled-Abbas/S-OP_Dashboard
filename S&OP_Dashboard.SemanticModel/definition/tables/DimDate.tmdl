@@ -1,0 +1,134 @@
+table DimDate
+	lineageTag: a583ffdf-b7dc-4460-b875-5a6e89c57a9b
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		lineageTag: 5574b618-efbd-4e20-88b2-d0c6170dd0a3
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DateKey
+		dataType: int64
+		formatString: 0
+		lineageTag: de34897d-2756-4219-88e1-b249ac8f6202
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: DateKey
+
+		annotation SummarizationSetBy = User
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: cf81084b-cc84-4d76-9853-82865ef74902
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column QuarterNo
+		dataType: int64
+		formatString: 0
+		lineageTag: 5573108c-3a8b-439d-b65d-8d6588e28033
+		summarizeBy: sum
+		sourceColumn: QuarterNo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: string
+		lineageTag: a7f105ab-1e66-4352-9137-c88b287d6c77
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNo
+		dataType: int64
+		formatString: 0
+		lineageTag: efb6e826-09e2-4640-8a8a-4c5c0290450e
+		summarizeBy: sum
+		sourceColumn: MonthNo
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: fb009304-c168-4d59-8f3a-15b81fc0f906
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthShort
+		dataType: string
+		lineageTag: bd4d55f7-efc1-435b-85da-9ec16fa6cff5
+		summarizeBy: none
+		sourceColumn: MonthShort
+
+		annotation SummarizationSetBy = Automatic
+
+	column Day
+		dataType: int64
+		formatString: 0
+		lineageTag: 6e59da7f-738f-435a-a093-ef5beda60f75
+		summarizeBy: sum
+		sourceColumn: Day
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimDate = m
+		mode: import
+		queryGroup: 02_Dimensions
+		source = ```
+				let
+				    // 1. Extract the earliest and latest dates across multiple staging tables to avoid orphaned records
+				    MinOrder = Date.From(List.Min(orders[OrderDate])),
+				    MaxOrder = Date.From(List.Max(orders[OrderDate])),
+				    MinCampaign = Date.From(List.Min(CAMPAIGN_LOG[StartDate])),
+				    MaxCampaign = Date.From(List.Max(CAMPAIGN_LOG[EndDate])),
+				    MinTarget = Date.From(List.Min(sales_targets[Period])),
+				    MaxTarget = Date.From(List.Max(sales_targets[Period])),
+				
+				    // 2. Find the absolute boundaries across the entire model
+				    OverallMin = List.Min({MinOrder, MinCampaign, MinTarget}),
+				    OverallMax = List.Max({MaxOrder, MaxCampaign, MaxTarget}),
+				
+				    // 3. Anchor to the start of the first year and end of the final year (Standard Date Table Requirement)
+				    StartYear = Date.Year(OverallMin),
+				    EndYear = Date.Year(OverallMax),
+				    StartDate = #date(StartYear, 1, 1),
+				    EndDate = #date(EndYear, 12, 31),
+				
+				    // 4. Generate the continuous sequence of dates
+				    DayCount = Duration.Days(EndDate - StartDate) + 1,
+				    Source = List.Dates(StartDate, DayCount, #duration(1, 0, 0, 0)),
+				    
+				    // 5. Convert to table and set the core data type
+				    TableFromList = Table.FromList(Source, Splitter.SplitByNothing(), {"Date"}, null, ExtraValues.Error),
+				    ChangedTypeDate = Table.TransformColumnTypes(TableFromList,{{"Date", type date}}),
+				
+				    // 6. Build the DateKey and standard temporal attributes
+				    AddDateKey = Table.AddColumn(ChangedTypeDate, "DateKey", each Date.Year([Date]) * 10000 + Date.Month([Date]) * 100 + Date.Day([Date]), Int64.Type),
+				    AddYear = Table.AddColumn(AddDateKey, "Year", each Date.Year([Date]), Int64.Type),
+				    AddQuarterNo = Table.AddColumn(AddYear, "QuarterNo", each Date.QuarterOfYear([Date]), Int64.Type),
+				    AddQuarter = Table.AddColumn(AddQuarterNo, "Quarter", each "Q" & Text.From([QuarterNo]), type text),
+				    AddMonthNo = Table.AddColumn(AddQuarter, "MonthNo", each Date.Month([Date]), Int64.Type),
+				    AddMonthName = Table.AddColumn(AddMonthNo, "Month", each Date.MonthName([Date]), type text),
+				    AddMonthShort = Table.AddColumn(AddMonthName, "MonthShort", each Text.Start([Month], 3), type text),
+				    AddDayOfMonth = Table.AddColumn(AddMonthShort, "Day", each Date.Day([Date]), Int64.Type)
+				in
+				    AddDayOfMonth
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,100 @@
+table FactOrderFulfillment
+	lineageTag: 6fd62f11-5652-43cc-a699-71e269019ce0
+
+	column OrderID
+		dataType: string
+		lineageTag: c7341dfb-513c-42c9-abba-04dbe1e7121a
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerID
+		dataType: int64
+		formatString: 0
+		lineageTag: aa504916-fb6a-4f20-b444-90948c8fd154
+		summarizeBy: none
+		sourceColumn: CustomerID
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: d1533bc6-d6b8-49c0-a0ff-ec8e81a9e768
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 38c24121-4cd3-41fa-8748-ade484f2344a
+		summarizeBy: none
+		sourceColumn: ShipDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DeliveryDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 8e077138-c437-4055-836b-236d59a64821
+		summarizeBy: none
+		sourceColumn: DeliveryDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column InvoiceDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 23dac557-7d52-4092-b037-ca13b0d80f4a
+		summarizeBy: none
+		sourceColumn: InvoiceDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column PayDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1c6d9741-ea7f-4323-aa67-8d6b4ea0062a
+		summarizeBy: none
+		sourceColumn: PayDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition FactOrderFulfillment = m
+		mode: import
+		queryGroup: 03_Facts
+		source =
+				let
+				    Source = orders,
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"OrderID", "CustomerName", "OrderDate"}),
+				    #"Merged Queries" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
+				    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCustomer",{"OrderID", "CustomerID", "CustomerName", "OrderDate"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"CustomerName"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"OrderID"}, shipments, {"OrderID"}, "shipments", JoinKind.LeftOuter),
+				    #"Expanded shipments" = Table.ExpandTableColumn(#"Merged Queries1", "shipments", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
+				    #"Merged Queries2" = Table.NestedJoin(#"Expanded shipments", {"OrderID"}, INVOICES, {"OrderID"}, "INVOICES", JoinKind.LeftOuter),
+				    #"Expanded INVOICES" = Table.ExpandTableColumn(#"Merged Queries2", "INVOICES", {"InvoiceID", "InvoiceDate"}, {"InvoiceID", "InvoiceDate"}),
+				    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded INVOICES",{"OrderID", "InvoiceID", "CustomerID", "OrderDate", "ShipDate", "DeliveryDate", "InvoiceDate"}),
+				    #"Merged Queries3" = Table.NestedJoin(#"Reordered Columns1", {"InvoiceID"}, payments, {"InvoiceID"}, "payments", JoinKind.LeftOuter),
+				    #"Expanded payments" = Table.ExpandTableColumn(#"Merged Queries3", "payments", {"PayDate"}, {"PayDate"}),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Expanded payments",{"InvoiceID"})
+				in
+				    #"Removed Columns1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

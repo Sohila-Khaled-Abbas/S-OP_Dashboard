@@ -1,0 +1,69 @@
+table FactCampaignSpend
+	lineageTag: fde1d650-ad1c-498a-867c-0ed6f3191761
+
+	column CampaignKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 91539263-06e2-4414-ab3b-e9108ee634e4
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: CampaignKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 40d63c39-0a83-4e14-b808-9669b662379b
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Impressions
+		dataType: int64
+		formatString: 0
+		lineageTag: 61732a3d-c036-477a-af22-0783b09acd10
+		summarizeBy: sum
+		sourceColumn: Impressions
+
+		annotation SummarizationSetBy = Automatic
+
+	column Clicks
+		dataType: int64
+		formatString: 0
+		lineageTag: 8644fffb-b52e-4530-9680-db0ee5c4bfad
+		summarizeBy: sum
+		sourceColumn: Clicks
+
+		annotation SummarizationSetBy = Automatic
+
+	column Spend
+		dataType: double
+		lineageTag: bfafa21d-c58a-4d76-b0b9-e57f0c20439d
+		summarizeBy: sum
+		sourceColumn: Spend
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition FactCampaignSpend = m
+		mode: import
+		queryGroup: 03_Facts
+		source =
+				let
+				    Source = CAMPAIGN_LOG,
+				    #"Merged Queries" = Table.NestedJoin(Source, {"CampaignName"}, DimCampaign, {"CampaignName"}, "DimCampaign", JoinKind.LeftOuter),
+				    #"Expanded DimCampaign" = Table.ExpandTableColumn(#"Merged Queries", "DimCampaign", {"CampaignKey"}, {"CampaignKey"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCampaign",{"CampaignKey", "CampaignName", "Channel", "StartDate", "EndDate", "Budget", "Date", "Impressions", "Clicks", "Spend"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Reordered Columns",{"CampaignKey", "Date", "Impressions", "Clicks", "Spend"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

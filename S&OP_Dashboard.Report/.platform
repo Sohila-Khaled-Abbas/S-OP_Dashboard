@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "S&OP_Dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "cb059c95-00f6-416c-b5e4-a361c2ddaaf2"
+  }
+}

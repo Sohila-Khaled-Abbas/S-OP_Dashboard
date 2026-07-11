@@ -1,0 +1,30 @@
+# Power BI Desktop local settings and cache (auto-generated)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+**/localSettings.json
+**/cache.abf
+
+# Power BI backups and temp files
+*.tmp
+*.bak
+*.log
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor and IDE configurations
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

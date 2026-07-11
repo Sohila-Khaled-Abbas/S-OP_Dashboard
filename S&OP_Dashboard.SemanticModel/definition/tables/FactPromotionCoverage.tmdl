@@ -1,0 +1,45 @@
+table FactPromotionCoverage
+	lineageTag: 5701e3fd-9be2-499a-bf63-8f3a334a587d
+
+	column CampaignKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 92d2c94a-0d02-4604-be8c-80fe3b324d89
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: CampaignKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f5050c5-d4cc-4308-b79f-bdbfd33687ef
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactPromotionCoverage = m
+		mode: import
+		queryGroup: 03_Facts
+		source =
+				let
+				    Source = campaign_skus,
+				    #"Split Column by Delimiter" = Table.ExpandListColumn(Table.TransformColumns(Source, {{"PromotedSKUs", Splitter.SplitTextByDelimiter(",", QuoteStyle.Csv), let itemType = (type nullable text) meta [Serialized.Text = true] in type {itemType}}}), "PromotedSKUs"),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"PromotedSKUs", type text}}),
+				    #"Trimmed Text" = Table.TransformColumns(#"Changed Type",{{"PromotedSKUs", Text.Trim, type text}}),
+				    #"Merged Queries" = Table.NestedJoin(#"Trimmed Text", {"CampaignName"}, DimCampaign, {"CampaignName"}, "DimCampaign", JoinKind.LeftOuter),
+				    #"Expanded DimCampaign" = Table.ExpandTableColumn(#"Merged Queries", "DimCampaign", {"CampaignKey"}, {"CampaignKey"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCampaign",{"CampaignKey", "CampaignName", "PromotedSKUs"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Reordered Columns", {"PromotedSKUs"}, DimProduct, {"ProductCode"}, "DimProduct", JoinKind.LeftOuter),
+				    #"Expanded DimProduct" = Table.ExpandTableColumn(#"Merged Queries1", "DimProduct", {"ProductKey"}, {"ProductKey"}),
+				    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded DimProduct",{"CampaignKey", "ProductKey", "CampaignName", "PromotedSKUs"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Reordered Columns1",{"CampaignKey", "ProductKey"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

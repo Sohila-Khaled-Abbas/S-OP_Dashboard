@@ -1,0 +1,78 @@
+table DimCampaign
+	lineageTag: 5770285e-a20b-4e62-a5a0-91bc16bd6513
+
+	column CampaignKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 89e06d27-fa2f-40ba-8cd5-2a0dc146d2c7
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: CampaignKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column CampaignName
+		dataType: string
+		lineageTag: cf41a097-fddf-4f13-aa0f-801f55fd2c6e
+		summarizeBy: none
+		sourceColumn: CampaignName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Channel
+		dataType: string
+		lineageTag: 625c95aa-a8d9-4a09-b911-89120667aef4
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column StartDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 89f6a64b-af08-4a8d-b211-5e8ca25a890c
+		summarizeBy: none
+		sourceColumn: StartDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column EndDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: abfc3cab-0de3-487b-b045-0295e2ccc95b
+		summarizeBy: none
+		sourceColumn: EndDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Budget
+		dataType: int64
+		formatString: 0
+		lineageTag: 246c8e02-a57f-4118-b639-ff665ba1371a
+		summarizeBy: sum
+		sourceColumn: Budget
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimCampaign = m
+		mode: import
+		queryGroup: 02_Dimensions
+		source =
+				let
+				    Source = CAMPAIGN_LOG,
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"CampaignName", "Channel", "StartDate", "EndDate", "Budget"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Added Index" = Table.AddIndexColumn(#"Removed Duplicates", "Index", 1, 1, Int64.Type),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Added Index",{"Index", "CampaignName", "Channel", "StartDate", "EndDate", "Budget"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Index", "CampaignKey"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

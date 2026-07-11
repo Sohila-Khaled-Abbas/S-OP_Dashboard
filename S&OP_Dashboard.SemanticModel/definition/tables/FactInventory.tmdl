@@ -1,0 +1,58 @@
+table FactInventory
+	lineageTag: 8e4bb9f4-398b-4201-9cf3-4aff84f0b699
+
+	column ProductKey
+		dataType: int64
+		formatString: 0
+		lineageTag: d5727fc0-4e14-4c1c-a6a1-f7145ea80163
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonth
+		dataType: dateTime
+		formatString: mmmm yyyy
+		lineageTag: b33c7bec-4b1b-4e80-9cff-9dd061a3b6b4
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Units
+		dataType: int64
+		formatString: 0
+		lineageTag: bcba601d-6e3c-4eef-9154-c1b90b79bedf
+		summarizeBy: sum
+		sourceColumn: Units
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactInventory = m
+		mode: import
+		queryGroup: 03_Facts
+		source =
+				let
+				    Source = inventory,
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductName", type text}, {"2025-01", Int64.Type}, {"2025-02", Int64.Type}, {"2025-03", Int64.Type}, {"2025-04", Int64.Type}, {"2025-05", Int64.Type}, {"2025-06", Int64.Type}, {"2025-07", Int64.Type}, {"2025-08", Int64.Type}, {"2025-09", Int64.Type}, {"2025-10", Int64.Type}, {"2025-11", Int64.Type}, {"2025-12", Int64.Type}}),
+				    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"ProductName"}, "Attribute", "Value"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"YearMonth", type date}}),
+				    #"Merged Queries" = Table.NestedJoin(#"Changed Type1", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
+				    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Value"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Value", "Units"}})
+				in
+				    #"Renamed Columns1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

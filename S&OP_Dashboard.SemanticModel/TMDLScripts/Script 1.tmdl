@@ -1,0 +1,1496 @@
+createOrReplace
+
+	model Model
+		culture: en-US
+		defaultPowerBIDataSourceVersion: powerBI_V3
+		sourceQueryCulture: en-001
+		dataAccessOptions
+			legacyRedirects
+			returnErrorValuesAsNull
+
+		table DimCustomer
+			lineageTag: c000dcd7-f108-411e-8eb4-bdfb38e84df2
+
+			column CustomerID
+				dataType: int64
+				formatString: 0
+				lineageTag: 31339db9-12d8-4649-8b66-01ce158a170f
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: CustomerID
+
+				annotation SummarizationSetBy = User
+
+			column CustomerName
+				dataType: string
+				lineageTag: d1b3dbc5-d78f-4529-808e-68c071b5383f
+				summarizeBy: none
+				sourceColumn: CustomerName
+
+				annotation SummarizationSetBy = Automatic
+
+			column Segment
+				dataType: string
+				lineageTag: 391c5dbd-8df3-40b9-9cbf-516d349d76eb
+				summarizeBy: none
+				sourceColumn: Segment
+
+				annotation SummarizationSetBy = Automatic
+
+			column AccountManager
+				dataType: string
+				lineageTag: f1e1c4b9-250a-440e-a7d2-ea6ec489922c
+				summarizeBy: none
+				sourceColumn: AccountManager
+
+				annotation SummarizationSetBy = Automatic
+
+			column PaymentTerms
+				dataType: string
+				lineageTag: 04714f26-18e1-44b0-b09e-fc7a77646284
+				summarizeBy: none
+				sourceColumn: PaymentTerms
+
+				annotation SummarizationSetBy = Automatic
+
+			column ContactName
+				dataType: string
+				lineageTag: 1c32d69b-b97f-47c5-b857-56e31785fac8
+				summarizeBy: none
+				sourceColumn: ContactName
+
+				annotation SummarizationSetBy = Automatic
+
+			column Email
+				dataType: string
+				lineageTag: 76b1dd14-f411-464c-90ec-d2fcf817d886
+				summarizeBy: none
+				sourceColumn: Email
+
+				annotation SummarizationSetBy = Automatic
+
+			column CreditLimit
+				dataType: int64
+				formatString: 0
+				lineageTag: cc62b440-acc1-4557-b9e9-3b4a44b79a88
+				summarizeBy: sum
+				sourceColumn: CreditLimit
+
+				annotation SummarizationSetBy = Automatic
+
+			column Phone
+				dataType: string
+				lineageTag: d61a69a6-d369-4954-90de-2235d6f3b56f
+				summarizeBy: none
+				sourceColumn: Phone
+
+				annotation SummarizationSetBy = Automatic
+
+			column Street
+				dataType: string
+				lineageTag: dd382d8b-4e1b-4f97-b403-b6c4008b76a8
+				summarizeBy: none
+				sourceColumn: Street
+
+				annotation SummarizationSetBy = Automatic
+
+			column City
+				dataType: string
+				lineageTag: c705ecf3-4541-455b-8509-85542d1bf857
+				summarizeBy: none
+				sourceColumn: City
+
+				annotation SummarizationSetBy = Automatic
+
+			column Region
+				dataType: string
+				lineageTag: 6c64fb8a-5987-46f3-aa2a-13b7b9961e26
+				summarizeBy: none
+				sourceColumn: Region
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimCustomer = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source =
+						let
+						    Source = CUST_MASTER,
+						    #"Filtered Rows" = Table.SelectRows(Source, each ([CustomerID] <> 9999)),
+						    #"Merged Queries" = Table.NestedJoin(#"Filtered Rows", {"CustomerID"}, customer_contacts, {"CustomerID"}, "customer_contacts", JoinKind.LeftOuter),
+						    #"Expanded customer_contacts" = Table.ExpandTableColumn(#"Merged Queries", "customer_contacts", {"ContactName", "Email", "IsPrimary"}, {"ContactName", "Email", "IsPrimary"}),
+						    #"Merged Queries1" = Table.NestedJoin(#"Expanded customer_contacts", {"CustomerID"}, user_details, {"UserID"}, "user_details", JoinKind.LeftOuter),
+						    #"Expanded user_details" = Table.ExpandTableColumn(#"Merged Queries1", "user_details", {"CreditLimit", "Phone"}, {"CreditLimit", "Phone"}),
+						    #"Merged Queries2" = Table.NestedJoin(#"Expanded user_details", {"AddressID"}, Address, {"AddressID"}, "Address", JoinKind.LeftOuter),
+						    #"Expanded Address" = Table.ExpandTableColumn(#"Merged Queries2", "Address", {"Street", "CityName"}, {"Street", "CityName"}),
+						    #"Merged Queries3" = Table.NestedJoin(#"Expanded Address", {"CityName"}, cities, {"CityName"}, "cities", JoinKind.LeftOuter),
+						    #"Expanded cities" = Table.ExpandTableColumn(#"Merged Queries3", "cities", {"RegionName"}, {"RegionName"}),
+						    #"Removed Columns" = Table.RemoveColumns(#"Expanded cities",{"AddressID", "hash_key", "source_id", "IsPrimary"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"CityName", "City"}, {"RegionName", "Region"}})
+						in
+						    #"Renamed Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table DimProduct
+			lineageTag: 3abb2fd6-8287-4b1c-afad-1c3d284ca288
+
+			column ProductKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 990fdc1c-a1b6-4b74-8d64-e020eaf18c78
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: ProductKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column ProductCode
+				dataType: string
+				lineageTag: a69109ea-6be9-4ae3-86ff-5e2b4b1a03d2
+				summarizeBy: none
+				sourceColumn: ProductCode
+
+				annotation SummarizationSetBy = Automatic
+
+			column ProductName
+				dataType: string
+				lineageTag: 52924d7c-be53-4968-b608-85c6ffccc741
+				summarizeBy: none
+				sourceColumn: ProductName
+
+				annotation SummarizationSetBy = Automatic
+
+			column Brand
+				dataType: string
+				lineageTag: e03aea82-c112-4ba2-85cf-ffbb49659556
+				summarizeBy: none
+				sourceColumn: Brand
+
+				annotation SummarizationSetBy = Automatic
+
+			column Category
+				dataType: string
+				lineageTag: 38b02732-39fb-4f34-bac3-931aa134b326
+				summarizeBy: none
+				sourceColumn: Category
+
+				annotation SummarizationSetBy = Automatic
+
+			column Subcategory
+				dataType: string
+				lineageTag: 233f5405-4ea4-4558-9d42-288382dfbf4c
+				summarizeBy: none
+				sourceColumn: Subcategory
+
+				annotation SummarizationSetBy = Automatic
+
+			column UnitPrice
+				dataType: double
+				lineageTag: c634f26b-ca4e-4773-859b-524c029b0d61
+				summarizeBy: sum
+				sourceColumn: UnitPrice
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column PrimarySupplier
+				dataType: string
+				lineageTag: f73be0c7-85b1-43fa-8a24-77ec0936bc7c
+				summarizeBy: none
+				sourceColumn: PrimarySupplier
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimProduct = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source =
+						let
+						    Source = products,
+						    #"Merged Queries" = Table.NestedJoin(Source, {"SubcategoryName"}, subcategories, {"Subcategory"}, "subcategories", JoinKind.LeftOuter),
+						    #"Expanded subcategories" = Table.ExpandTableColumn(#"Merged Queries", "subcategories", {"Category"}, {"Category"}),
+						    #"Filtered Rows" = Table.SelectRows(#"Expanded subcategories", each ([ProductCode] <> "ZZZ-000") and ([source_id] <> "SAP-099001" and [source_id] <> "SAP-099002")),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Filtered Rows",{"ProductCode", "ProductName", "Brand", "Category", "SubcategoryName", "UnitPrice", "PrimarySupplier"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"SubcategoryName", "Subcategory"}}),
+						    #"Added Index" = Table.AddIndexColumn(#"Renamed Columns", "Index", 1, 1, Int64.Type),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Added Index",{"Index", "ProductCode", "ProductName", "Brand", "Category", "Subcategory", "UnitPrice", "PrimarySupplier"}),
+						    #"Renamed Columns1" = Table.RenameColumns(#"Reordered Columns1",{{"Index", "ProductKey"}}),
+						    #"Removed Other Columns" = Table.SelectColumns(#"Renamed Columns1",{"ProductKey", "ProductCode", "ProductName", "Brand", "Category", "Subcategory", "UnitPrice", "PrimarySupplier"})
+						in
+						    #"Removed Other Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table DimOrderFlags
+			lineageTag: cebf9be6-b93c-49e1-a211-2aafdd730ef3
+
+			column FlagKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 8ed5c2af-7680-4192-ab11-7c9f4029e023
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: FlagKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column Channel
+				dataType: string
+				lineageTag: e1468eb0-3e59-48be-95e7-93bc298fc7ec
+				summarizeBy: none
+				sourceColumn: Channel
+
+				annotation SummarizationSetBy = Automatic
+
+			column Status
+				dataType: string
+				lineageTag: dbd985bf-0850-4b12-8a1d-d786688dd78c
+				summarizeBy: none
+				sourceColumn: Status
+
+				annotation SummarizationSetBy = Automatic
+
+			column Priority
+				dataType: string
+				lineageTag: 40d0741c-64c6-4546-8249-217bd524e5a7
+				summarizeBy: none
+				sourceColumn: Priority
+
+				annotation SummarizationSetBy = Automatic
+
+			column OrderChannel
+				dataType: int64
+				formatString: 0
+				lineageTag: 3fbab5cb-c6a1-4492-b1dc-940b5add8ddd
+				summarizeBy: none
+				sourceColumn: OrderChannel
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimOrderFlags = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source =
+						let
+						    Source = orders,
+						    #"Removed Other Columns" = Table.SelectColumns(Source,{"OrderChannel", "Status", "Priority"}),
+						    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+						    #"Added Index" = Table.AddIndexColumn(#"Removed Duplicates", "Index", 1, 1, Int64.Type),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Added Index",{"Index", "OrderChannel", "Status", "Priority"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Index", "FlagKey"}}),
+						    #"Merged Queries" = Table.NestedJoin(#"Renamed Columns", {"OrderChannel"}, channels, {"ChannelCode"}, "channels", JoinKind.LeftOuter),
+						    #"Expanded channels" = Table.ExpandTableColumn(#"Merged Queries", "channels", {"ChannelName"}, {"ChannelName"}),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded channels",{"FlagKey", "ChannelName", "Status", "Priority"}),
+						    #"Renamed Columns1" = Table.RenameColumns(#"Reordered Columns1",{{"ChannelName", "Channel"}})
+						in
+						    #"Renamed Columns1"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactSales
+			lineageTag: f7e21107-32c0-4c48-aa95-8d19ea403ad6
+
+			column LineID
+				dataType: string
+				lineageTag: adbe3cd6-4080-46da-96b6-52c781819ff7
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: LineID
+
+				annotation SummarizationSetBy = Automatic
+
+			column OrderID
+				dataType: string
+				lineageTag: df44b0c6-9706-47f9-bbc8-77dced1231e6
+				summarizeBy: none
+				sourceColumn: OrderID
+
+				annotation SummarizationSetBy = Automatic
+
+			column Quantity
+				dataType: int64
+				formatString: 0
+				lineageTag: 0d8b7842-090d-427a-ac81-5cf68482e5da
+				summarizeBy: sum
+				sourceColumn: Quantity
+
+				annotation SummarizationSetBy = Automatic
+
+			column UnitPrice
+				dataType: double
+				lineageTag: 3e0c17ef-083a-4f68-9984-7fe2b7716047
+				summarizeBy: sum
+				sourceColumn: UnitPrice
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column UnitCost
+				dataType: double
+				lineageTag: 525baa23-7bbe-4037-913f-51e39025b90b
+				summarizeBy: sum
+				sourceColumn: UnitCost
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column DiscountPct
+				dataType: double
+				lineageTag: c7ee80eb-0936-4806-9678-5100f1995638
+				summarizeBy: sum
+				sourceColumn: DiscountPct
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column LineTotal
+				dataType: double
+				lineageTag: fc6a15de-385d-4a01-98c2-e0ed2a1e0f77
+				summarizeBy: sum
+				sourceColumn: LineTotal
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column CustomerID
+				dataType: int64
+				formatString: 0
+				lineageTag: ca8ab05b-4a29-408c-bb04-5eba4ca1878a
+				summarizeBy: none
+				sourceColumn: CustomerID
+
+				annotation SummarizationSetBy = Automatic
+
+			column ProductKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 20e013b5-2a1b-4bb1-ba27-8902480c5e2f
+				summarizeBy: none
+				sourceColumn: ProductKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column FlagKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 7040188a-c36c-4812-93b1-cfa53025af0a
+				summarizeBy: none
+				sourceColumn: FlagKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column OrderDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: bf27ea10-060a-4411-9281-56b4930ee79f
+				summarizeBy: none
+				sourceColumn: OrderDate
+
+				annotation SummarizationSetBy = Automatic
+
+			column ShipToCityKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 1baf1ff4-9f4a-4f3c-9dd7-13f613b3f036
+				summarizeBy: count
+				sourceColumn: ShipToCityKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column BillToCityKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 959edda7-1fc0-40ac-94d5-40fe646697d2
+				summarizeBy: none
+				sourceColumn: BillToCityKey
+
+				annotation SummarizationSetBy = Automatic
+
+			partition FactSales = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = order_line_items,
+						    #"Merged Queries" = Table.NestedJoin(Source, {"OrderID"}, orders, {"OrderID"}, "orders", JoinKind.LeftOuter),
+						    #"Expanded orders" = Table.ExpandTableColumn(#"Merged Queries", "orders", {"CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}, {"CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Merged Queries1" = Table.NestedJoin(#"Expanded orders", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
+						    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries1", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCustomer",{"LineID", "OrderID", "CustomerID", "ProductName", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Merged Queries2" = Table.NestedJoin(#"Reordered Columns", {"ProductName"}, DimProduct, {"ProductName"}, "DimProduct", JoinKind.LeftOuter),
+						    #"Expanded DimProduct" = Table.ExpandTableColumn(#"Merged Queries2", "DimProduct", {"ProductKey"}, {"ProductKey"}),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded DimProduct",{"LineID", "OrderID", "CustomerID", "ProductKey", "ProductName", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Merged Queries3" = Table.NestedJoin(#"Reordered Columns1", {"OrderChannel", "Status", "Priority"}, DimOrderFlags, {"OrderChannel", "Status", "Priority"}, "DimOrderFlags", JoinKind.LeftOuter),
+						    #"Expanded DimOrderFlags" = Table.ExpandTableColumn(#"Merged Queries3", "DimOrderFlags", {"FlagKey"}, {"FlagKey"}),
+						    #"Reordered Columns2" = Table.ReorderColumns(#"Expanded DimOrderFlags",{"LineID", "OrderID", "CustomerID", "ProductKey", "FlagKey", "ProductName", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Merged Queries4" = Table.NestedJoin(#"Reordered Columns2", {"ShipToCity"}, DimGeo, {"City"}, "DimGeo", JoinKind.LeftOuter),
+						    #"Expanded DimGeo" = Table.ExpandTableColumn(#"Merged Queries4", "DimGeo", {"GeoKey"}, {"GeoKey"}),
+						    #"Reordered Columns3" = Table.ReorderColumns(#"Expanded DimGeo",{"LineID", "OrderID", "CustomerID", "ProductKey", "FlagKey", "GeoKey", "ProductName", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns3",{{"GeoKey", "ShipToCityKey"}}),
+						    #"Merged Queries5" = Table.NestedJoin(#"Renamed Columns", {"BillToCity"}, DimGeo, {"City"}, "DimGeo", JoinKind.LeftOuter),
+						    #"Expanded DimGeo1" = Table.ExpandTableColumn(#"Merged Queries5", "DimGeo", {"GeoKey"}, {"GeoKey"}),
+						    #"Reordered Columns4" = Table.ReorderColumns(#"Expanded DimGeo1",{"LineID", "OrderID", "CustomerID", "ProductKey", "FlagKey", "ShipToCityKey", "GeoKey", "ProductName", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "CustomerName", "CustomerCity", "RegionName", "ShipToCity", "BillToCity", "OrderDate", "OrderChannel", "Status", "Priority", "OrderTotal"}),
+						    #"Renamed Columns1" = Table.RenameColumns(#"Reordered Columns4",{{"GeoKey", "BillToCityKey"}}),
+						    #"Removed Other Columns" = Table.SelectColumns(#"Renamed Columns1",{"LineID", "OrderID", "CustomerID", "ProductKey", "FlagKey", "ShipToCityKey", "BillToCityKey", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal", "OrderDate"}),
+						    #"Reordered Columns5" = Table.ReorderColumns(#"Removed Other Columns",{"LineID", "OrderID", "CustomerID", "ProductKey", "ShipToCityKey", "BillToCityKey", "FlagKey", "OrderDate", "Quantity", "UnitPrice", "UnitCost", "DiscountPct", "LineTotal"})
+						in
+						    #"Reordered Columns5"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table DimGeo
+			lineageTag: 0df4cd71-0785-4cbe-bfb3-ace1c651e0b9
+
+			column GeoKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 720cd411-1379-4fe1-bf1b-c4bb89f778b0
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: GeoKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column City
+				dataType: string
+				lineageTag: 04dadaba-1105-4f06-8da8-f1ecf9d7d6b9
+				summarizeBy: none
+				sourceColumn: City
+
+				annotation SummarizationSetBy = Automatic
+
+			column Region
+				dataType: string
+				lineageTag: af0d8aee-dbe8-41de-8559-5cbb2a37f506
+				summarizeBy: none
+				sourceColumn: Region
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimGeo = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source =
+						let
+						    Source = cities,
+						    #"Removed Duplicates" = Table.Distinct(Source),
+						    #"Added Index" = Table.AddIndexColumn(#"Removed Duplicates", "Index", 1, 1, Int64.Type),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Added Index",{"Index", "CityName", "RegionName"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Index", "GeoKey"}, {"CityName", "City"}, {"RegionName", "Region"}})
+						in
+						    #"Renamed Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactInventory
+			lineageTag: 8e4bb9f4-398b-4201-9cf3-4aff84f0b699
+
+			column ProductKey
+				dataType: int64
+				formatString: 0
+				lineageTag: d5727fc0-4e14-4c1c-a6a1-f7145ea80163
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: ProductKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column YearMonth
+				dataType: dateTime
+				formatString: mmmm yyyy
+				lineageTag: b33c7bec-4b1b-4e80-9cff-9dd061a3b6b4
+				summarizeBy: none
+				sourceColumn: YearMonth
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+				annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+			column Units
+				dataType: int64
+				formatString: 0
+				lineageTag: bcba601d-6e3c-4eef-9154-c1b90b79bedf
+				summarizeBy: sum
+				sourceColumn: Units
+
+				annotation SummarizationSetBy = Automatic
+
+			partition FactInventory = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = inventory,
+						    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+						    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductName", type text}, {"2025-01", Int64.Type}, {"2025-02", Int64.Type}, {"2025-03", Int64.Type}, {"2025-04", Int64.Type}, {"2025-05", Int64.Type}, {"2025-06", Int64.Type}, {"2025-07", Int64.Type}, {"2025-08", Int64.Type}, {"2025-09", Int64.Type}, {"2025-10", Int64.Type}, {"2025-11", Int64.Type}, {"2025-12", Int64.Type}}),
+						    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"ProductName"}, "Attribute", "Value"),
+						    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}}),
+						    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"YearMonth", type date}}),
+						    #"Merged Queries" = Table.NestedJoin(#"Changed Type1", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
+						    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Value"}),
+						    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"}),
+						    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Value", "Units"}})
+						in
+						    #"Renamed Columns1"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table DimCampaign
+			lineageTag: 5770285e-a20b-4e62-a5a0-91bc16bd6513
+
+			column CampaignKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 89e06d27-fa2f-40ba-8cd5-2a0dc146d2c7
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: CampaignKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column CampaignName
+				dataType: string
+				lineageTag: cf41a097-fddf-4f13-aa0f-801f55fd2c6e
+				summarizeBy: none
+				sourceColumn: CampaignName
+
+				annotation SummarizationSetBy = Automatic
+
+			column Channel
+				dataType: string
+				lineageTag: 625c95aa-a8d9-4a09-b911-89120667aef4
+				summarizeBy: none
+				sourceColumn: Channel
+
+				annotation SummarizationSetBy = Automatic
+
+			column StartDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 89f6a64b-af08-4a8d-b211-5e8ca25a890c
+				summarizeBy: none
+				sourceColumn: StartDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column EndDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: abfc3cab-0de3-487b-b045-0295e2ccc95b
+				summarizeBy: none
+				sourceColumn: EndDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column Budget
+				dataType: int64
+				formatString: 0
+				lineageTag: 246c8e02-a57f-4118-b639-ff665ba1371a
+				summarizeBy: sum
+				sourceColumn: Budget
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimCampaign = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source =
+						let
+						    Source = CAMPAIGN_LOG,
+						    #"Removed Other Columns" = Table.SelectColumns(Source,{"CampaignName", "Channel", "StartDate", "EndDate", "Budget"}),
+						    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+						    #"Added Index" = Table.AddIndexColumn(#"Removed Duplicates", "Index", 1, 1, Int64.Type),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Added Index",{"Index", "CampaignName", "Channel", "StartDate", "EndDate", "Budget"}),
+						    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Index", "CampaignKey"}})
+						in
+						    #"Renamed Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactCampaignSpend
+			lineageTag: fde1d650-ad1c-498a-867c-0ed6f3191761
+
+			column CampaignKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 91539263-06e2-4414-ab3b-e9108ee634e4
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: CampaignKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column Date
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 40d63c39-0a83-4e14-b808-9669b662379b
+				summarizeBy: none
+				sourceColumn: Date
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column Impressions
+				dataType: int64
+				formatString: 0
+				lineageTag: 61732a3d-c036-477a-af22-0783b09acd10
+				summarizeBy: sum
+				sourceColumn: Impressions
+
+				annotation SummarizationSetBy = Automatic
+
+			column Clicks
+				dataType: int64
+				formatString: 0
+				lineageTag: 8644fffb-b52e-4530-9680-db0ee5c4bfad
+				summarizeBy: sum
+				sourceColumn: Clicks
+
+				annotation SummarizationSetBy = Automatic
+
+			column Spend
+				dataType: double
+				lineageTag: bfafa21d-c58a-4d76-b0b9-e57f0c20439d
+				summarizeBy: sum
+				sourceColumn: Spend
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			partition FactCampaignSpend = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = CAMPAIGN_LOG,
+						    #"Merged Queries" = Table.NestedJoin(Source, {"CampaignName"}, DimCampaign, {"CampaignName"}, "DimCampaign", JoinKind.LeftOuter),
+						    #"Expanded DimCampaign" = Table.ExpandTableColumn(#"Merged Queries", "DimCampaign", {"CampaignKey"}, {"CampaignKey"}),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCampaign",{"CampaignKey", "CampaignName", "Channel", "StartDate", "EndDate", "Budget", "Date", "Impressions", "Clicks", "Spend"}),
+						    #"Removed Other Columns" = Table.SelectColumns(#"Reordered Columns",{"CampaignKey", "Date", "Impressions", "Clicks", "Spend"})
+						in
+						    #"Removed Other Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactPromotionCoverage
+			lineageTag: 5701e3fd-9be2-499a-bf63-8f3a334a587d
+
+			column CampaignKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 92d2c94a-0d02-4604-be8c-80fe3b324d89
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: CampaignKey
+
+				annotation SummarizationSetBy = Automatic
+
+			column ProductKey
+				dataType: int64
+				formatString: 0
+				lineageTag: 6f5050c5-d4cc-4308-b79f-bdbfd33687ef
+				summarizeBy: none
+				sourceColumn: ProductKey
+
+				annotation SummarizationSetBy = Automatic
+
+			partition FactPromotionCoverage = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = campaign_skus,
+						    #"Split Column by Delimiter" = Table.ExpandListColumn(Table.TransformColumns(Source, {{"PromotedSKUs", Splitter.SplitTextByDelimiter(",", QuoteStyle.Csv), let itemType = (type nullable text) meta [Serialized.Text = true] in type {itemType}}}), "PromotedSKUs"),
+						    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"PromotedSKUs", type text}}),
+						    #"Trimmed Text" = Table.TransformColumns(#"Changed Type",{{"PromotedSKUs", Text.Trim, type text}}),
+						    #"Merged Queries" = Table.NestedJoin(#"Trimmed Text", {"CampaignName"}, DimCampaign, {"CampaignName"}, "DimCampaign", JoinKind.LeftOuter),
+						    #"Expanded DimCampaign" = Table.ExpandTableColumn(#"Merged Queries", "DimCampaign", {"CampaignKey"}, {"CampaignKey"}),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCampaign",{"CampaignKey", "CampaignName", "PromotedSKUs"}),
+						    #"Merged Queries1" = Table.NestedJoin(#"Reordered Columns", {"PromotedSKUs"}, DimProduct, {"ProductCode"}, "DimProduct", JoinKind.LeftOuter),
+						    #"Expanded DimProduct" = Table.ExpandTableColumn(#"Merged Queries1", "DimProduct", {"ProductKey"}, {"ProductKey"}),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded DimProduct",{"CampaignKey", "ProductKey", "CampaignName", "PromotedSKUs"}),
+						    #"Removed Other Columns" = Table.SelectColumns(#"Reordered Columns1",{"CampaignKey", "ProductKey"})
+						in
+						    #"Removed Other Columns"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactOrderFulfillment
+			lineageTag: 6fd62f11-5652-43cc-a699-71e269019ce0
+
+			column OrderID
+				dataType: string
+				lineageTag: c7341dfb-513c-42c9-abba-04dbe1e7121a
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: OrderID
+
+				annotation SummarizationSetBy = Automatic
+
+			column CustomerID
+				dataType: int64
+				formatString: 0
+				lineageTag: aa504916-fb6a-4f20-b444-90948c8fd154
+				summarizeBy: none
+				sourceColumn: CustomerID
+
+				annotation SummarizationSetBy = Automatic
+
+			column OrderDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: d1533bc6-d6b8-49c0-a0ff-ec8e81a9e768
+				summarizeBy: none
+				sourceColumn: OrderDate
+
+				annotation SummarizationSetBy = Automatic
+
+			column ShipDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 38c24121-4cd3-41fa-8748-ade484f2344a
+				summarizeBy: none
+				sourceColumn: ShipDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column DeliveryDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 8e077138-c437-4055-836b-236d59a64821
+				summarizeBy: none
+				sourceColumn: DeliveryDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column InvoiceDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 23dac557-7d52-4092-b037-ca13b0d80f4a
+				summarizeBy: none
+				sourceColumn: InvoiceDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column PayDate
+				dataType: dateTime
+				formatString: Short Date
+				lineageTag: 1c6d9741-ea7f-4323-aa67-8d6b4ea0062a
+				summarizeBy: none
+				sourceColumn: PayDate
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			partition FactOrderFulfillment = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = orders,
+						    #"Removed Other Columns" = Table.SelectColumns(Source,{"OrderID", "CustomerName", "OrderDate"}),
+						    #"Merged Queries" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
+						    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCustomer",{"OrderID", "CustomerID", "CustomerName", "OrderDate"}),
+						    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"CustomerName"}),
+						    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"OrderID"}, shipments, {"OrderID"}, "shipments", JoinKind.LeftOuter),
+						    #"Expanded shipments" = Table.ExpandTableColumn(#"Merged Queries1", "shipments", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
+						    #"Merged Queries2" = Table.NestedJoin(#"Expanded shipments", {"OrderID"}, INVOICES, {"OrderID"}, "INVOICES", JoinKind.LeftOuter),
+						    #"Expanded INVOICES" = Table.ExpandTableColumn(#"Merged Queries2", "INVOICES", {"InvoiceID", "InvoiceDate"}, {"InvoiceID", "InvoiceDate"}),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded INVOICES",{"OrderID", "InvoiceID", "CustomerID", "OrderDate", "ShipDate", "DeliveryDate", "InvoiceDate"}),
+						    #"Merged Queries3" = Table.NestedJoin(#"Reordered Columns1", {"InvoiceID"}, payments, {"InvoiceID"}, "payments", JoinKind.LeftOuter),
+						    #"Expanded payments" = Table.ExpandTableColumn(#"Merged Queries3", "payments", {"PayDate"}, {"PayDate"}),
+						    #"Removed Columns1" = Table.RemoveColumns(#"Expanded payments",{"InvoiceID"})
+						in
+						    #"Removed Columns1"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table FactSalesTargets
+			lineageTag: 5a6adfae-72f4-4e6b-a342-82e5cc140d51
+
+			column Period
+				dataType: dateTime
+				formatString: mmmm yyyy
+				lineageTag: 37a87fab-5f11-4445-834e-b06039eb1ece
+				summarizeBy: none
+				sourceColumn: Period
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+				annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+			column TargetRevenue
+				dataType: int64
+				formatString: 0
+				lineageTag: b25c2f8f-8a21-4dd0-8f0d-929ece760570
+				summarizeBy: sum
+				sourceColumn: TargetRevenue
+
+				annotation SummarizationSetBy = Automatic
+
+			partition FactSalesTargets = m
+				mode: import
+				queryGroup: 03_Facts
+				source =
+						let
+						    Source = sales_targets
+						in
+						    Source
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table Security
+			lineageTag: ea592985-7e9a-4d86-8d68-38cb6c44f59e
+
+			column UserEmail
+				dataType: string
+				lineageTag: f027afae-7723-4b72-806d-9fbbcf688603
+				summarizeBy: none
+				sourceColumn: UserEmail
+
+				annotation SummarizationSetBy = Automatic
+
+			column Region
+				dataType: string
+				lineageTag: 9ce3c2ed-37a9-4928-b7dd-e4e32b47f4b5
+				summarizeBy: none
+				sourceColumn: Region
+
+				annotation SummarizationSetBy = Automatic
+
+			partition Security = m
+				mode: import
+				queryGroup: 04_Support
+				source =
+						let
+						  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+						  #"Navigation 1" = Source{[Item = "security", Kind = "Sheet"]}[Data],
+						  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}, {"Column2", type text}}, "en-US"),
+						    #"Promoted Headers" = Table.PromoteHeaders(#"Changed column type", [PromoteAllScalars=true]),
+						    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"UserEmail", type text}, {"Region", type text}})
+						in
+						  #"Changed Type"
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table DimDate
+			lineageTag: a583ffdf-b7dc-4460-b875-5a6e89c57a9b
+			dataCategory: Time
+
+			column Date
+				dataType: dateTime
+				isKey
+				formatString: Short Date
+				lineageTag: 5574b618-efbd-4e20-88b2-d0c6170dd0a3
+				summarizeBy: none
+				sourceColumn: Date
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column DateKey
+				dataType: int64
+				formatString: 0
+				lineageTag: de34897d-2756-4219-88e1-b249ac8f6202
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: DateKey
+
+				annotation SummarizationSetBy = User
+
+			column Year
+				dataType: int64
+				formatString: 0
+				lineageTag: cf81084b-cc84-4d76-9853-82865ef74902
+				summarizeBy: sum
+				sourceColumn: Year
+
+				annotation SummarizationSetBy = Automatic
+
+			column QuarterNo
+				dataType: int64
+				formatString: 0
+				lineageTag: 5573108c-3a8b-439d-b65d-8d6588e28033
+				summarizeBy: sum
+				sourceColumn: QuarterNo
+
+				annotation SummarizationSetBy = Automatic
+
+			column Quarter
+				dataType: string
+				lineageTag: a7f105ab-1e66-4352-9137-c88b287d6c77
+				summarizeBy: none
+				sourceColumn: Quarter
+
+				annotation SummarizationSetBy = Automatic
+
+			column MonthNo
+				dataType: int64
+				formatString: 0
+				lineageTag: efb6e826-09e2-4640-8a8a-4c5c0290450e
+				summarizeBy: sum
+				sourceColumn: MonthNo
+
+				annotation SummarizationSetBy = Automatic
+
+			column Month
+				dataType: string
+				lineageTag: fb009304-c168-4d59-8f3a-15b81fc0f906
+				summarizeBy: none
+				sourceColumn: Month
+
+				annotation SummarizationSetBy = Automatic
+
+			column MonthShort
+				dataType: string
+				lineageTag: bd4d55f7-efc1-435b-85da-9ec16fa6cff5
+				summarizeBy: none
+				sourceColumn: MonthShort
+
+				annotation SummarizationSetBy = Automatic
+
+			column Day
+				dataType: int64
+				formatString: 0
+				lineageTag: 6e59da7f-738f-435a-a093-ef5beda60f75
+				summarizeBy: sum
+				sourceColumn: Day
+
+				annotation SummarizationSetBy = Automatic
+
+			partition DimDate = m
+				mode: import
+				queryGroup: 02_Dimensions
+				source = ```
+						let
+						    // 1. Extract the earliest and latest dates across multiple staging tables to avoid orphaned records
+						    MinOrder = Date.From(List.Min(orders[OrderDate])),
+						    MaxOrder = Date.From(List.Max(orders[OrderDate])),
+						    MinCampaign = Date.From(List.Min(CAMPAIGN_LOG[StartDate])),
+						    MaxCampaign = Date.From(List.Max(CAMPAIGN_LOG[EndDate])),
+						    MinTarget = Date.From(List.Min(sales_targets[Period])),
+						    MaxTarget = Date.From(List.Max(sales_targets[Period])),
+						
+						    // 2. Find the absolute boundaries across the entire model
+						    OverallMin = List.Min({MinOrder, MinCampaign, MinTarget}),
+						    OverallMax = List.Max({MaxOrder, MaxCampaign, MaxTarget}),
+						
+						    // 3. Anchor to the start of the first year and end of the final year (Standard Date Table Requirement)
+						    StartYear = Date.Year(OverallMin),
+						    EndYear = Date.Year(OverallMax),
+						    StartDate = #date(StartYear, 1, 1),
+						    EndDate = #date(EndYear, 12, 31),
+						
+						    // 4. Generate the continuous sequence of dates
+						    DayCount = Duration.Days(EndDate - StartDate) + 1,
+						    Source = List.Dates(StartDate, DayCount, #duration(1, 0, 0, 0)),
+						    
+						    // 5. Convert to table and set the core data type
+						    TableFromList = Table.FromList(Source, Splitter.SplitByNothing(), {"Date"}, null, ExtraValues.Error),
+						    ChangedTypeDate = Table.TransformColumnTypes(TableFromList,{{"Date", type date}}),
+						
+						    // 6. Build the DateKey and standard temporal attributes
+						    AddDateKey = Table.AddColumn(ChangedTypeDate, "DateKey", each Date.Year([Date]) * 10000 + Date.Month([Date]) * 100 + Date.Day([Date]), Int64.Type),
+						    AddYear = Table.AddColumn(AddDateKey, "Year", each Date.Year([Date]), Int64.Type),
+						    AddQuarterNo = Table.AddColumn(AddYear, "QuarterNo", each Date.QuarterOfYear([Date]), Int64.Type),
+						    AddQuarter = Table.AddColumn(AddQuarterNo, "Quarter", each "Q" & Text.From([QuarterNo]), type text),
+						    AddMonthNo = Table.AddColumn(AddQuarter, "MonthNo", each Date.Month([Date]), Int64.Type),
+						    AddMonthName = Table.AddColumn(AddMonthNo, "Month", each Date.MonthName([Date]), type text),
+						    AddMonthShort = Table.AddColumn(AddMonthName, "MonthShort", each Text.Start([Month], 3), type text),
+						    AddDayOfMonth = Table.AddColumn(AddMonthShort, "Day", each Date.Day([Date]), Int64.Type)
+						in
+						    AddDayOfMonth
+						```
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		relationship 79955cb1-6507-a07e-c220-b47283ff2ee2
+			fromColumn: FactSales.FlagKey
+			toColumn: DimOrderFlags.FlagKey
+
+		relationship e650dafa-6ece-d86c-4663-5e14e894fb4b
+			fromColumn: FactSales.CustomerID
+			toColumn: DimCustomer.CustomerID
+
+		relationship 36baa9cf-915b-f9be-685b-8333a199576e
+			fromColumn: FactSales.ProductKey
+			toColumn: DimProduct.ProductKey
+
+		relationship 41458990-738f-b9de-56cf-367fd373f5de
+			fromColumn: FactSales.BillToCityKey
+			toColumn: DimGeo.GeoKey
+
+		relationship 6b83ff2c-e36a-cb6b-420a-f33b8bc6233f
+			isActive: false
+			fromColumn: FactSales.ShipToCityKey
+			toColumn: DimGeo.GeoKey
+
+		relationship e942cf55-f6e6-7233-f03e-151cc99cdb02
+			fromColumn: FactInventory.ProductKey
+			toColumn: DimProduct.ProductKey
+
+		relationship 8c471037-07c1-5c98-dac6-58e53b02a304
+			fromColumn: FactCampaignSpend.CampaignKey
+			toColumn: DimCampaign.CampaignKey
+
+		relationship 1fe06857-8fe3-88ff-d34b-f4f22dae29af
+			fromColumn: FactPromotionCoverage.CampaignKey
+			toColumn: DimCampaign.CampaignKey
+
+		relationship d3b8bdbb-ebde-9110-d56c-3bbb75da3851
+			fromColumn: FactPromotionCoverage.ProductKey
+			toColumn: DimProduct.ProductKey
+
+		relationship 9b8ef54b-73e0-d75c-6aa4-c3637bf8aa06
+			fromColumn: FactOrderFulfillment.CustomerID
+			toColumn: DimCustomer.CustomerID
+
+		relationship 50822ba5-c784-1796-88e0-ec87e1ce233d
+			fromColumn: FactSales.OrderDate
+			toColumn: DimDate.Date
+
+		relationship bbd8aa6c-5e50-d34c-9622-0a8442847eba
+			fromColumn: FactOrderFulfillment.OrderDate
+			toColumn: DimDate.Date
+
+		relationship dc0beaa9-2049-beee-3b81-ce379e4e1a36
+			isActive: false
+			fromColumn: FactOrderFulfillment.DeliveryDate
+			toColumn: DimDate.Date
+
+		relationship f5172d74-1e95-b7dd-0dd2-b60f558f5976
+			isActive: false
+			fromColumn: FactOrderFulfillment.InvoiceDate
+			toColumn: DimDate.Date
+
+		relationship 786c8cb1-cc92-f192-91e6-6af950d3d5de
+			isActive: false
+			fromColumn: FactOrderFulfillment.ShipDate
+			toColumn: DimDate.Date
+
+		relationship 2bd10ce1-c738-2324-93c6-0373b1f794b5
+			isActive: false
+			fromColumn: FactOrderFulfillment.PayDate
+			toColumn: DimDate.Date
+
+		relationship 948cfc52-0d77-3c10-6b2e-36674d6f0a97
+			fromColumn: FactInventory.YearMonth
+			toColumn: DimDate.Date
+
+		relationship f0c93f68-3f6d-c5ce-69d8-234572cf47a5
+			crossFilteringBehavior: bothDirections
+			fromCardinality: one
+			fromColumn: DimDate.Date
+			toColumn: FactSalesTargets.Period
+
+		relationship 16e8a4a3-230b-a35a-0117-85c02f1b8188
+			isActive: false
+			fromColumn: DimCustomer.City
+			toColumn: DimGeo.City
+
+		relationship f60fd889-2543-da30-ea36-7253b7c57d69
+			fromColumn: DimCustomer.Region
+			toColumn: Security.Region
+
+		relationship 4ea9a23f-0b80-b249-5576-f9153d870c27
+			isActive: false
+			fromColumn: DimGeo.Region
+			toColumn: Security.Region
+
+		cultureInfo en-US
+
+		expression Address =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "Address", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"AddressID", Int64.Type}, {"Street", type text}, {"CityName", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 47a04a2e-5944-4bbf-be47-7fcc13393a08
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression CUST_MASTER =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "CUST_MASTER", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"CustomerID", Int64.Type}, {"CustomerName", type text}, {"Segment", type text}, {"AddressID", Int64.Type}, {"AccountManager", type text}, {"PaymentTerms", type text}, {"hash_key", type text}, {"source_id", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 125ddf3b-3972-4aa0-85b5-8ebf2b3f677c
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression cities =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "cities", Kind = "Sheet"]}[Data],
+				  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}, {"Column2", type text}}, "en-US"),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed column type", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CityName", type text}, {"RegionName", type text}})
+				in
+				  #"Changed Type"
+			lineageTag: ee404aa9-83da-4f6c-99a0-665d0173c0ea
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression customer_contacts =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "customer_contacts", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"CustomerID", Int64.Type}, {"ContactName", type text}, {"Email", type text}, {"IsPrimary", type logical}}, "en-US"),
+				    #"Filtered Rows" = Table.SelectRows(#"Changed column type", each ([IsPrimary] = true))
+				in
+				  #"Filtered Rows"
+			lineageTag: 74724387-c650-4b12-885c-167b26fdf186
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression regions =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "regions", Kind = "Sheet"]}[Data],
+				  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}}, "en-US"),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed column type", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"RegionName", type text}})
+				in
+				  #"Changed Type"
+			lineageTag: 72f618a4-9f88-4c95-9cb5-2065198340d7
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression user_details =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "user_details", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"UserID", Int64.Type}, {"CreditLimit", Int64.Type}, {"Phone", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 0d16637a-d25e-45a6-b5e9-531fefe787bf
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression products =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "products", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"ProductCode", type text}, {"ProductName", type text}, {"Brand", type text}, {"SubcategoryName", type text}, {"UnitPrice", type number}, {"PrimarySupplier", type text}, {"ProductDescription", type text}, {"hash_key", type text}, {"source_id", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 19ec4594-1475-4ee9-a5b7-180b6e77b2e0
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		expression subcategories =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "subcategories", Kind = "Sheet"]}[Data],
+				  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}}, "en-US"),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed column type", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CategorySubcategory", type text}}),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Changed Type", "CategorySubcategory", Splitter.SplitTextByDelimiter("|", QuoteStyle.Csv), {"Category", "Subcategory"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Category", type text}, {"Subcategory", type text}}),
+				    #"Capitalized Each Word" = Table.TransformColumns(#"Changed Type1",{{"Category", Text.Proper, type text}, {"Subcategory", Text.Proper, type text}})
+				in
+				    #"Capitalized Each Word"
+			lineageTag: 6e699469-0055-4c42-bc0d-b045c86a610c
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression orders =
+				let
+				    Source = Table.Combine({ORDERS_2025, ORDERS_2026}),
+				    #"Removed Columns" = Table.RemoveColumns(Source,{"LegacyRef", "SourceFile", "GiftMessage", "OrderNotes"})
+				in
+				    #"Removed Columns"
+			lineageTag: 7f1cf99d-e9ab-4809-bd74-d2d9192651a8
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression channels =
+				let
+				  Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMjRQ0lHyz8vJzEtVCC7JL0pVitWJVjICiQalliRm5igEJBaV5KUWgcWNQeLhGfk5qcWJORClJiAht8zUnBSFYLBYLAA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ChannelCode = _t, ChannelName = _t]),
+				  #"Changed column type" = Table.TransformColumnTypes(Source, {{"ChannelCode", Int64.Type}, {"ChannelName", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 7ae3efe5-d6f6-49aa-b518-f834eec5caef
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression ORDERS_2025 =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "ORDERS_2025", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"OrderID", type text}, {"LegacyRef", type text}, {"CustomerName", type text}, {"CustomerCity", type text}, {"RegionName", type text}, {"ShipToCity", type text}, {"BillToCity", type text}, {"OrderDate", type datetime}, {"OrderChannel", Int64.Type}, {"Status", type text}, {"Priority", type text}, {"OrderTotal", type number}, {"OrderNotes", type text}, {"SourceFile", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 52bd3776-8ab5-4da3-826f-3a90818dda7d
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression ORDERS_2026 =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "ORDERS_2026", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"OrderID", type text}, {"CustomerName", type text}, {"CustomerCity", type text}, {"RegionName", type text}, {"ShipToCity", type text}, {"BillToCity", type text}, {"OrderDate", type datetime}, {"OrderChannel", Int64.Type}, {"Status", type text}, {"Priority", type text}, {"OrderTotal", type number}, {"OrderNotes", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 64f89755-d37b-44ae-9796-89c093ecd183
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression order_line_items =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "order_line_items", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"LineID", type text}, {"OrderID", type text}, {"ProductName", type text}, {"Quantity", Int64.Type}, {"UnitPrice", type number}, {"UnitCost", type number}, {"DiscountPct", type number}, {"LineTotal", type number}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 9727c124-da7d-4017-8133-1bba6354ae40
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		expression CAMPAIGN_LOG =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "CAMPAIGN_LOG", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"CampaignName", type text}, {"Channel", type text}, {"StartDate", type date}, {"EndDate", type date}, {"Budget", Int64.Type}, {"Date", type date}, {"Impressions", Int64.Type}, {"Clicks", Int64.Type}, {"Spend", type number}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 5fbda42a-986d-4db8-bf28-466677215060
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		expression INVOICES =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "INVOICES", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"InvoiceID", type text}, {"OrderID", type text}, {"CustomerName", type text}, {"InvoiceDate", type date}, {"Amount", type number}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 6bda6a9d-9f45-430b-92a9-95114d6524ae
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		expression campaign_skus =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "campaign_skus", Kind = "Sheet"]}[Data],
+				  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}, {"Column2", type text}}, "en-US"),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed column type", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CampaignName", type text}, {"PromotedSKUs", type text}})
+				in
+				  #"Changed Type"
+			lineageTag: b4cf26c8-cac1-4d9a-bf50-a06bd29c3ef6
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+			annotation PBI_NavigationStepName = Navigation
+
+		expression exchange_rates =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "exchange_rates", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"Currency", type text}, {"Rate", type number}, {"Date", type date}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: ad067bbc-bfb1-4c1c-9701-251af64499cb
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression inventory =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "inventory", Kind = "Sheet"]}[Data],
+				  #"Changed column type" = Table.TransformColumnTypes(#"Navigation 1", {{"Column1", type text}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: fc374313-1faa-447d-9813-851ef1998234
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression invoice_lines =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "invoice_lines", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"InvoiceLineID", type text}, {"InvoiceID", type text}, {"ProductName", type text}, {"Amount", type number}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: f3be3005-b328-46a4-8e5d-6d5f38053573
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression payments =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "payments", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"PaymentID", type text}, {"InvoiceID", type text}, {"CustomerName", type text}, {"PayDate", type date}, {"Amount", type number}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: f051197f-be21-4d56-bf2b-7d384d42505d
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		expression sales_targets =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "sales_targets", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"Period", type date}, {"TargetRevenue", Int64.Type}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: b5ac156e-ef37-4e40-8484-429b959cf6c2
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		expression shipments =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  #"Navigation 1" = Source{[Item = "shipments", Kind = "Sheet"]}[Data],
+				  #"Promoted headers" = Table.PromoteHeaders(#"Navigation 1", [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"ShipmentID", type text}, {"OrderID", type text}, {"ShipMode", type text}, {"ShipDate", type date}, {"DeliveryDate", type date}}, "en-US")
+				in
+				  #"Changed column type"
+			lineageTag: 8da78d97-7b38-4fd8-a010-7fdf9ecfa9b4
+			queryGroup: 01_Staging
+
+			annotation PBI_ResultType = Table
+
+		queryGroup 01_Staging
+
+			annotation PBI_QueryGroupOrder = 0
+
+		queryGroup 02_Dimensions
+
+			annotation PBI_QueryGroupOrder = 1
+
+		queryGroup 03_Facts
+
+			annotation PBI_QueryGroupOrder = 2
+
+		queryGroup 04_Support
+
+			annotation PBI_QueryGroupOrder = 3
+
+		annotation __PBI_TimeIntelligenceEnabled = 0
+
+		annotation PBI_QueryOrder = ["Address","CAMPAIGN_LOG","CUST_MASTER","INVOICES","ORDERS_2025","ORDERS_2026","campaign_skus","cities","customer_contacts","exchange_rates","inventory","invoice_lines","order_line_items","payments","products","regions","sales_targets","Security","shipments","subcategories","user_details","DimCustomer","DimProduct","DimOrderFlags","DimGeo","DimCampaign","DimDate","orders","channels","FactSales","FactInventory","FactCampaignSpend","FactPromotionCoverage","FactOrderFulfillment","FactSalesTargets"]
+
+		annotation PBI_ProTooling = ["DevMode","TMDLView_Desktop"]
+
