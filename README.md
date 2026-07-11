@@ -135,6 +135,26 @@ cd "Omnichannel Sales & Operations (S&OP) Dashboard"
 
 ---
 
+## 📖 Project Documentation & Automation
+
+To support development and business alignment, this repository includes an advanced documentation suite and automated parsing pipeline:
+
+*   **[S&OP Business Workflow Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/sop_workflow.md):** Connects S&OP planning phases (Demand, Supply, Finance) with specific tables in our model, featuring our modern Draw.io-style architecture flowchart.
+*   **[DAX & Modeling Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/dax_and_modeling.md):** Detailed standards for DAX calculations, including formula templates for key business metrics (e.g. OTIF %, Days of Inventory Cover, Sales vs Target Variance).
+*   **[Automated Data Dictionary](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/data_dictionary.md):** A structured data catalog listing all tables, fields, data types, and relationships (updated dynamically).
+
+### 🤖 Documentation Automation (CI/CD)
+To guarantee that the documentation stays up-to-date with your Power BI model, we created an automated pipeline:
+*   **[generate_data_dictionary.py](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/scripts/generate_data_dictionary.py):** A Python script that scans and parses active `.tmdl` files in `S&OP_Dashboard.SemanticModel` to automatically rebuild the data dictionary.
+*   **GitHub Action Pipeline:** A workflow ([`auto_docs.yml`](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/.github/workflows/auto_docs.yml)) automatically runs the parser script and commits documentation changes whenever updates to database schemas or relationship properties are pushed.
+
+To execute the parser locally:
+```bash
+python scripts/generate_data_dictionary.py
+```
+
+---
+
 ## 🛠️ Contribution Workflow
 
 Because this project is saved in Developer Mode, changes to DAX measures, columns, table schemas, and visual components are stored as text files (TMDL). This allows you to edit and review code safely.
