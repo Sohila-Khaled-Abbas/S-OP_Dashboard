@@ -79,20 +79,25 @@ table FactOrderFulfillment
 				let
 				    Source = orders,
 				    #"Removed Other Columns" = Table.SelectColumns(Source,{"OrderID", "CustomerName", "OrderDate"}),
-				    #"Merged Queries" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
-				    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
-				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCustomer",{"OrderID", "CustomerID", "CustomerName", "OrderDate"}),
-				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"CustomerName"}),
-				    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"OrderID"}, shipments, {"OrderID"}, "shipments", JoinKind.LeftOuter),
-				    #"Expanded shipments" = Table.ExpandTableColumn(#"Merged Queries1", "shipments", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
-				    #"Merged Queries2" = Table.NestedJoin(#"Expanded shipments", {"OrderID"}, INVOICES, {"OrderID"}, "INVOICES", JoinKind.LeftOuter),
-				    #"Expanded INVOICES" = Table.ExpandTableColumn(#"Merged Queries2", "INVOICES", {"InvoiceID", "InvoiceDate"}, {"InvoiceID", "InvoiceDate"}),
-				    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded INVOICES",{"OrderID", "InvoiceID", "CustomerID", "OrderDate", "ShipDate", "DeliveryDate", "InvoiceDate"}),
-				    #"Merged Queries3" = Table.NestedJoin(#"Reordered Columns1", {"InvoiceID"}, payments, {"InvoiceID"}, "payments", JoinKind.LeftOuter),
-				    #"Expanded payments" = Table.ExpandTableColumn(#"Merged Queries3", "payments", {"PayDate"}, {"PayDate"}),
-				    #"Removed Columns1" = Table.RemoveColumns(#"Expanded payments",{"InvoiceID"})
+				    #"Merged Queries Customer" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
+				    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries Customer", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
+				    #"Removed CustomerName" = Table.RemoveColumns(#"Expanded DimCustomer",{"CustomerName"}),
+				    
+				    // Aggregate Shipments to enforce 1:1 grain per OrderID
+				    #"Grouped Shipments" = Table.Group(shipments, {"OrderID"}, {{"ShipDate", each List.Max([ShipDate]), type nullable date}, {"DeliveryDate", each List.Max([DeliveryDate]), type nullable date}}),
+				    #"Merged Shipments" = Table.NestedJoin(#"Removed CustomerName", {"OrderID"}, #"Grouped Shipments", {"OrderID"}, "ShipmentData", JoinKind.LeftOuter),
+				    #"Expanded Shipments" = Table.ExpandTableColumn(#"Merged Shipments", "ShipmentData", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
+				    
+				    // Join Payments to Invoices, then aggregate financial dates by OrderID
+				    #"Invoices with Payments" = Table.NestedJoin(INVOICES, {"InvoiceID"}, payments, {"InvoiceID"}, "PaymentDetails", JoinKind.LeftOuter),
+				    #"Expanded Payments" = Table.ExpandTableColumn(#"Invoices with Payments", "PaymentDetails", {"PayDate"}, {"PayDate"}),
+				    #"Grouped Invoices" = Table.Group(#"Expanded Payments", {"OrderID"}, {{"InvoiceDate", each List.Max([InvoiceDate]), type nullable date}, {"PayDate", each List.Max([PayDate]), type nullable date}}),
+				    
+				    // Join aggregated financial dates back to fulfillment table
+				    #"Merged Invoices" = Table.NestedJoin(#"Expanded Shipments", {"OrderID"}, #"Grouped Invoices", {"OrderID"}, "InvoiceData", JoinKind.LeftOuter),
+				    #"Expanded InvoiceData" = Table.ExpandTableColumn(#"Merged Invoices", "InvoiceData", {"InvoiceDate", "PayDate"}, {"InvoiceDate", "PayDate"})
 				in
-				    #"Removed Columns1"
+				    #"Expanded InvoiceData"
 
 	annotation PBI_NavigationStepName = Navigation
 
