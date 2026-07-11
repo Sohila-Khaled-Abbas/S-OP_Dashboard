@@ -47,7 +47,7 @@ table FactInventory
 				    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}, {"Value", "Units"}}),
 				    // Cast types AFTER unpivot — YearMonth and Units are now single columns, no hardcoding needed
 				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"ProductName", type text}, {"YearMonth", type date}, {"Units", Int64.Type}}),
-				    #"Merged Queries" = Table.NestedJoin(#"Changed Type", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
+				    #"Merged Queries" = Table.NestedJoin(#"Changed Type", {"ProductName"}, Table.Buffer(DimProduct), {"ProductName"}, "products", JoinKind.LeftOuter),
 				    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
 				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Units"}),
 				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"})
