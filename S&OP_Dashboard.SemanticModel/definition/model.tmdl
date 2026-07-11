@@ -24,7 +24,7 @@ queryGroup 04_Support
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["Address","CAMPAIGN_LOG","CUST_MASTER","INVOICES","ORDERS_2025","ORDERS_2026","campaign_skus","cities","customer_contacts","exchange_rates","inventory","invoice_lines","order_line_items","payments","products","regions","sales_targets","Security","shipments","subcategories","user_details","DimCustomer","DimProduct","DimOrderFlags","DimGeo","DimCampaign","DimDate","orders","channels","FactSales","FactInventory","FactCampaignSpend","FactPromotionCoverage","FactOrderFulfillment","FactSalesTargets"]
+annotation PBI_QueryOrder = ["ExcelSource","Address","CAMPAIGN_LOG","CUST_MASTER","INVOICES","ORDERS_2025","ORDERS_2026","campaign_skus","cities","customer_contacts","exchange_rates","inventory","invoice_lines","order_line_items","payments","products","regions","sales_targets","Security","shipments","subcategories","user_details","DimCustomer","DimProduct","DimOrderFlags","DimGeo","DimCampaign","DimDate","orders","channels","FactSales","FactInventory","FactCampaignSpend","FactPromotionCoverage","FactOrderFulfillment","FactSalesTargets"]
 
 annotation PBI_ProTooling = ["DevMode","TMDLView_Desktop"]
 

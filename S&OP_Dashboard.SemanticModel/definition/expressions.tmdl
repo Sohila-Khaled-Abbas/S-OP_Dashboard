@@ -1,3 +1,16 @@
+expression ExcelSource =
+		let
+		  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+		  Buffered = Table.Buffer(Source)
+		in
+		  Buffered
+	lineageTag: e8d7a6f2-a5b6-7890-bcde-f01234567890
+	queryGroup: 01_Staging
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
 expression Address =
 		let
 		  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
