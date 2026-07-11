@@ -1,31 +1,11 @@
-/// =============================================================================
-/// Row-Level Security (RLS) Role Definitions
-/// Pattern: Disconnected Security Table via USERPRINCIPALNAME() + LOOKUPVALUE()
-///
-/// Security table has NO physical relationship to any fact or dimension.
-/// RLS is enforced purely through DAX filter expressions on DimCustomer
-/// and DimGeo, using LOOKUPVALUE to resolve the logged-in user's Region.
-///
-/// Security Table Schema:
-///   Security[UserEmail]  — Entra ID / Power BI account email
-///   Security[Region]     — Region(s) the user is permitted to view
-/// =============================================================================
-
 role 'Regional Sales Rep'
 	modelPermission: read
 
-	/// Filter DimCustomer — each regional user only sees customers in their region.
-	/// LOOKUPVALUE resolves the current user's email → permitted Region value.
-	/// USERPRINCIPALNAME() returns the Entra ID UPN of the signed-in Power BI user.
 	tablePermission DimCustomer = [Region] = LOOKUPVALUE(
 	    Security[Region],
 	    Security[UserEmail], USERPRINCIPALNAME()
 	)
 
-	/// Filter DimGeo — restricts geographic dimension to the user's region.
-	/// This propagates downstream through active relationships to FactSales
-	/// (via BillToCityKey → DimGeo.GeoKey) and ensures all geo-dependent
-	/// visuals are scoped correctly.
 	tablePermission DimGeo = [Region] = LOOKUPVALUE(
 	    Security[Region],
 	    Security[UserEmail], USERPRINCIPALNAME()
@@ -34,12 +14,5 @@ role 'Regional Sales Rep'
 role 'Executive'
 	modelPermission: read
 
-	/// Executives see ALL regions — no table-level filter applied.
-	/// Grant this role to senior leadership who require the full cross-regional view.
-	/// No tablePermission blocks = unrestricted row access.
-
 role 'Admin'
 	modelPermission: readRefresh
-
-	/// Admins have full read + refresh permissions with no data restrictions.
-	/// Assign to Power BI Admins and ETL service accounts only.
