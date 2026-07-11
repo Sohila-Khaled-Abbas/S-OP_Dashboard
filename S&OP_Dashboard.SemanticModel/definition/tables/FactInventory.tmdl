@@ -46,13 +46,4 @@ table FactInventory
 				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"YearMonth", type date}}),
 				    #"Merged Queries" = Table.NestedJoin(#"Changed Type1", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
 				    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
-				    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Value"}),
-				    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"}),
-				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Value", "Units"}})
-				in
-				    #"Renamed Columns1"
-
-	annotation PBI_NavigationStepName = Navigation
-
-	annotation PBI_ResultType = Table
-
+				    #"R

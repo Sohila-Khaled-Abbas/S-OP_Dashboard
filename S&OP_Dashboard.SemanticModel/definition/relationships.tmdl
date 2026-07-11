@@ -32,6 +32,7 @@ relationship 1fe06857-8fe3-88ff-d34b-f4f22dae29af
 	toColumn: DimCampaign.CampaignKey
 
 relationship d3b8bdbb-ebde-9110-d56c-3bbb75da3851
+	crossFilteringBehavior: bothDirections
 	fromColumn: FactPromotionCoverage.ProductKey
 	toColumn: DimProduct.ProductKey
 
@@ -72,8 +73,6 @@ relationship 948cfc52-0d77-3c10-6b2e-36674d6f0a97
 	toColumn: DimDate.Date
 
 relationship f0c93f68-3f6d-c5ce-69d8-234572cf47a5
-	crossFilteringBehavior: bothDirections
-	fromCardinality: one
 	fromColumn: DimDate.Date
 	toColumn: FactSalesTargets.Period
 
@@ -82,12 +81,7 @@ relationship 16e8a4a3-230b-a35a-0117-85c02f1b8188
 	fromColumn: DimCustomer.City
 	toColumn: DimGeo.City
 
-relationship f60fd889-2543-da30-ea36-7253b7c57d69
-	fromColumn: DimCustomer.Region
-	toColumn: Security.Region
-
-relationship 4ea9a23f-0b80-b249-5576-f9153d870c27
-	isActive: false
-	fromColumn: DimGeo.Region
-	toColumn: Security.Region
+// Security table relationships intentionally removed.
+// RLS is enforced via DAX USERPRINCIPALNAME() in the Security table.
+// Physical relationships caused unpredictable many-to-many filter chains.
 
