@@ -17,12 +17,12 @@ table KeyMeasures
 		lineageTag: d1e2f3a4-b5c6-7890-def0-123456789013
 
 	measure 'Sales Variance' = [Total Sales] - [Sales Target]
-		formatString: "$#,##0.00;($#,##0.00);\"-\""
+		formatString: "$#,##0.00;($#,##0.00);""-"""
 		displayFolder: 01_Sales Performance
 		lineageTag: e1f2a3b4-c5d6-7890-ef01-234567890124
 
 	measure 'Sales Variance %' = DIVIDE([Sales Variance], [Sales Target], BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 01_Sales Performance
 		lineageTag: f1a2b3c4-d5e6-7890-f012-345678901235
 
@@ -37,7 +37,7 @@ table KeyMeasures
 		lineageTag: b2c3d4e5-f6a7-8901-bcde-f12345678907
 
 	measure 'Sales YoY Growth %' = DIVIDE([Sales YTD] - [Sales PYTD], [Sales PYTD], BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 01_Sales Performance
 		lineageTag: c2d3e4f5-a6b7-8901-cdef-023456789018
 
@@ -45,7 +45,7 @@ table KeyMeasures
 			VAR _CurrentMonth = [Total Sales]
 			VAR _PreviousMonth = CALCULATE([Total Sales], DATEADD(DimDate[Date], -1, MONTH))
 			RETURN DIVIDE(_CurrentMonth - _PreviousMonth, _PreviousMonth, BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 01_Sales Performance
 		lineageTag: d2e3f4a5-b6c7-8901-def0-134567890129
 
@@ -65,7 +65,7 @@ table KeyMeasures
 		lineageTag: a3b4c5d6-e7f8-9012-abcd-ef34567890bc
 
 	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Total Sales], BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 02_Profitability
 		lineageTag: b3c4d5e6-f7a8-9012-bcde-f034567890cd
 
@@ -84,7 +84,7 @@ table KeyMeasures
 		lineageTag: d3e4f5a6-b7c8-9012-def0-2034567890ef
 
 	measure 'Days of Inventory Cover' = DIVIDE([Total Stock Units], [Avg Daily Sales (30d)], BLANK())
-		formatString: "#,##0.0 \"days\""
+		formatString: "#,##0.0 ""days"""
 		displayFolder: 03_Supply & Inventory
 		lineageTag: e3f4a5b6-c7d8-9012-ef01-3034567890f0
 
@@ -106,7 +106,7 @@ table KeyMeasures
 		lineageTag: a4b5c6d7-e8f9-0123-abcd-ef456789012b
 
 	measure 'OTIF %' = DIVIDE([On-Time Deliveries], [Total Orders], BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: b4c5d6e7-f8a9-0123-bcde-f0456789023c
 
@@ -119,7 +119,7 @@ table KeyMeasures
 			        DAY
 			    )
 			)
-		formatString: "#,##0.0 \"days\""
+		formatString: "#,##0.0 ""days"""
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: c4d5e6f7-a8b9-0123-cdef-10456789034d
 
@@ -132,7 +132,7 @@ table KeyMeasures
 			        DAY
 			    )
 			)
-		formatString: "#,##0.0 \"days\""
+		formatString: "#,##0.0 ""days"""
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: d4e5f6a7-b8c9-0123-def0-20456789045e
 
@@ -142,7 +142,7 @@ table KeyMeasures
 		lineageTag: e4f5a6b7-c8d9-0123-ef01-30456789056f
 
 	measure 'Marketing ROI' = DIVIDE([Total Sales], [Total Campaign Spend], BLANK())
-		formatString: "#,##0.00\"x\""
+		formatString: "#,##0.00""x"""
 		displayFolder: 05_Marketing & Campaigns
 		lineageTag: f4a5b6c7-d8e9-0123-f012-40456789067a
 
@@ -174,7 +174,7 @@ table KeyMeasures
 			    )
 			RETURN
 			    DIVIDE(_RepeatCustomers, [Total Customers], BLANK())
-		formatString: "0.0%;(0.0%);\"-\""
+		formatString: "0.0%;(0.0%);""-"""
 		displayFolder: 06_Customer Analytics
 		lineageTag: d5e6f7a8-b0c1-1234-def0-2067890ab0be
 
