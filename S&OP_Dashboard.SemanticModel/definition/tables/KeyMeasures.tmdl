@@ -54,7 +54,7 @@ table KeyMeasures
 		displayFolder: 01_Sales Performance
 		lineageTag: e2f3a4b5-c6d7-8901-ef01-24567890013a
 
-	measure 'Total COGS' = SUM(FactSales[COGS])
+	measure 'Total COGS' = SUMX(FactSales, FactSales[Quantity] * FactSales[UnitCost])
 		formatString: "$#,##0.00"
 		displayFolder: 02_Profitability
 		lineageTag: f2a3b4c5-d6e7-8901-f012-3456789001ab

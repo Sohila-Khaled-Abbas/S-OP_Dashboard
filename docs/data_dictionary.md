@@ -250,7 +250,7 @@
 | **`'Sales YoY Growth`** | `DIVIDE([Sales YTD] - [Sales PYTD], [Sales PYTD], BLANK())...` | - |
 | **`'Sales MoM Growth`** | `VAR _CurrentMonth = [Total Sales] VAR _PreviousMonth = CA...` | - |
 | **`'Avg Order Value'`** | `DIVIDE([Total Sales], DISTINCTCOUNT(FactSales[OrderID]), ...` | - |
-| **`'Total COGS'`** | `SUM(FactSales[COGS]) formatString: "$#,##0.00" displayFol...` | - |
+| **`'Total COGS'`** | `SUMX(FactSales, FactSales[Quantity] * FactSales[UnitCost]...` | - |
 | **`'Gross Profit'`** | `[Total Sales] - [Total COGS] formatString: "$#,##0.00" di...` | - |
 | **`'Gross Margin`** | `DIVIDE([Gross Profit], [Total Sales], BLANK()) formatStri...` | - |
 | **`'Total Stock Units'`** | `SUM(FactInventory[Units]) formatString: "#,##0" displayFo...` | - |
