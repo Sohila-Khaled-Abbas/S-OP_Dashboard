@@ -1,9 +1,11 @@
 # Omnichannel Sales & Operations (S&OP) Dashboard
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge&logo=power-bi&logoColor=black" alt="Power BI Badge"/>
-  <img src="https://img.shields.io/badge/Git_Developer_Mode-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git Developer Mode Badge"/>
-  <img src="https://img.shields.io/badge/Schema-Star_Schema-blue?style=for-the-badge" alt="Star Schema Badge"/>
+  <img src="https://img.shields.io/badge/Power_BI-F2C811?style=flat-square&logo=power-bi&logoColor=black" alt="Power BI Badge"/>
+  <img src="https://img.shields.io/badge/Git_Developer_Mode-F05032?style=flat-square&logo=git&logoColor=white" alt="Git Developer Mode Badge"/>
+  <img src="https://img.shields.io/badge/Schema-Star_Schema-2C3E50?style=flat-square" alt="Star Schema Badge"/>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python Badge"/>
+  <img src="https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white" alt="GitHub Actions Badge"/>
 </p>
 
 An enterprise-grade **Omnichannel Sales & Operations Planning (S&OP) Dashboard** built with Microsoft Power BI. This repository leverages the new Power BI Project (`.pbip`) format and Tabular Model Definition Language (TMDL) for standard git-based version control, enabling team collaboration, code reviews, and structured releases.
