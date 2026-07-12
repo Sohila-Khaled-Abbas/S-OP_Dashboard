@@ -539,18 +539,20 @@ createOrReplace
 				source =
 						let
 						    Source = inventory,
+						    // Promote headers first, then IMMEDIATELY unpivot all non-identity columns.
+						    // This removes the hardcoded year-month column list so new years (2026+)
+						    // are automatically picked up without any M code changes.
 						    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-						    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductName", type text}, {"2025-01", Int64.Type}, {"2025-02", Int64.Type}, {"2025-03", Int64.Type}, {"2025-04", Int64.Type}, {"2025-05", Int64.Type}, {"2025-06", Int64.Type}, {"2025-07", Int64.Type}, {"2025-08", Int64.Type}, {"2025-09", Int64.Type}, {"2025-10", Int64.Type}, {"2025-11", Int64.Type}, {"2025-12", Int64.Type}}),
-						    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"ProductName"}, "Attribute", "Value"),
-						    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}}),
-						    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"YearMonth", type date}}),
-						    #"Merged Queries" = Table.NestedJoin(#"Changed Type1", {"ProductName"}, DimProduct, {"ProductName"}, "products", JoinKind.LeftOuter),
+						    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Promoted Headers", {"ProductName"}, "Attribute", "Value"),
+						    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "YearMonth"}, {"Value", "Units"}}),
+						    // Cast types AFTER unpivot — YearMonth and Units are now single columns, no hardcoding needed
+						    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"ProductName", type text}, {"YearMonth", type date}, {"Units", Int64.Type}}),
+						    #"Merged Queries" = Table.NestedJoin(#"Changed Type", {"ProductName"}, Table.Buffer(DimProduct), {"ProductName"}, "products", JoinKind.LeftOuter),
 						    #"Expanded products" = Table.ExpandTableColumn(#"Merged Queries", "products", {"ProductKey"}, {"ProductKey"}),
-						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Value"}),
-						    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"}),
-						    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns",{{"Value", "Units"}})
+						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded products",{"ProductKey", "ProductName", "YearMonth", "Units"}),
+						    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"ProductName"})
 						in
-						    #"Renamed Columns1"
+						    #"Removed Columns"
 
 			annotation PBI_NavigationStepName = Navigation
 
@@ -829,20 +831,27 @@ createOrReplace
 						let
 						    Source = orders,
 						    #"Removed Other Columns" = Table.SelectColumns(Source,{"OrderID", "CustomerName", "OrderDate"}),
-						    #"Merged Queries" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, DimCustomer, {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
-						    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
-						    #"Reordered Columns" = Table.ReorderColumns(#"Expanded DimCustomer",{"OrderID", "CustomerID", "CustomerName", "OrderDate"}),
-						    #"Removed Columns" = Table.RemoveColumns(#"Reordered Columns",{"CustomerName"}),
-						    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"OrderID"}, shipments, {"OrderID"}, "shipments", JoinKind.LeftOuter),
-						    #"Expanded shipments" = Table.ExpandTableColumn(#"Merged Queries1", "shipments", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
-						    #"Merged Queries2" = Table.NestedJoin(#"Expanded shipments", {"OrderID"}, INVOICES, {"OrderID"}, "INVOICES", JoinKind.LeftOuter),
-						    #"Expanded INVOICES" = Table.ExpandTableColumn(#"Merged Queries2", "INVOICES", {"InvoiceID", "InvoiceDate"}, {"InvoiceID", "InvoiceDate"}),
-						    #"Reordered Columns1" = Table.ReorderColumns(#"Expanded INVOICES",{"OrderID", "InvoiceID", "CustomerID", "OrderDate", "ShipDate", "DeliveryDate", "InvoiceDate"}),
-						    #"Merged Queries3" = Table.NestedJoin(#"Reordered Columns1", {"InvoiceID"}, payments, {"InvoiceID"}, "payments", JoinKind.LeftOuter),
-						    #"Expanded payments" = Table.ExpandTableColumn(#"Merged Queries3", "payments", {"PayDate"}, {"PayDate"}),
-						    #"Removed Columns1" = Table.RemoveColumns(#"Expanded payments",{"InvoiceID"})
+						    #"Merged Queries Customer" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, Table.Buffer(DimCustomer), {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
+						    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries Customer", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
+						    #"Removed CustomerName" = Table.RemoveColumns(#"Expanded DimCustomer",{"CustomerName"}),
+						
+						    // Aggregate Shipments to enforce 1:1 grain per OrderID and buffer in RAM
+						    #"Grouped Shipments" = Table.Group(shipments, {"OrderID"}, {{"ShipDate", each List.Max([ShipDate]), type nullable date}, {"DeliveryDate", each List.Max([DeliveryDate]), type nullable date}}),
+						    #"Buffered Shipments" = Table.Buffer(#"Grouped Shipments"),
+						    #"Merged Shipments" = Table.NestedJoin(#"Removed CustomerName", {"OrderID"}, #"Buffered Shipments", {"OrderID"}, "ShipmentData", JoinKind.LeftOuter),
+						    #"Expanded Shipments" = Table.ExpandTableColumn(#"Merged Shipments", "ShipmentData", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
+						
+						    // Join Payments to Invoices, aggregate financial dates by OrderID, and buffer in RAM
+						    #"Invoices with Payments" = Table.NestedJoin(INVOICES, {"InvoiceID"}, payments, {"InvoiceID"}, "PaymentDetails", JoinKind.LeftOuter),
+						    #"Expanded Payments" = Table.ExpandTableColumn(#"Invoices with Payments", "PaymentDetails", {"PayDate"}, {"PayDate"}),
+						    #"Grouped Invoices" = Table.Group(#"Expanded Payments", {"OrderID"}, {{"InvoiceDate", each List.Max([InvoiceDate]), type nullable date}, {"PayDate", each List.Max([PayDate]), type nullable date}}),
+						    #"Buffered Invoices" = Table.Buffer(#"Grouped Invoices"),
+						
+						    // Join aggregated financial dates back to fulfillment table
+						    #"Merged Invoices" = Table.NestedJoin(#"Expanded Shipments", {"OrderID"}, #"Buffered Invoices", {"OrderID"}, "InvoiceData", JoinKind.LeftOuter),
+						    #"Expanded InvoiceData" = Table.ExpandTableColumn(#"Merged Invoices", "InvoiceData", {"InvoiceDate", "PayDate"}, {"InvoiceDate", "PayDate"})
 						in
-						    #"Removed Columns1"
+						    #"Expanded InvoiceData"
 
 			annotation PBI_NavigationStepName = Navigation
 
@@ -1056,6 +1065,590 @@ createOrReplace
 
 			annotation PBI_ResultType = Table
 
+		table KeyMeasures
+			lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+			measure 'Total Sales' = SUM(FactSales[LineTotal])
+				formatString: $#,##0.00
+				displayFolder: 01_Sales Performance
+				lineageTag: b1c2d3e4-f5a6-7890-bcde-f01234567891
+
+			measure 'Total Quantity Sold' = SUM(FactSales[Quantity])
+				formatString: #,##0
+				displayFolder: 01_Sales Performance
+				lineageTag: c1d2e3f4-a5b6-7890-cdef-012345678902
+
+			measure 'Sales Target' = SUM(FactSalesTargets[TargetRevenue])
+				formatString: $#,##0.00
+				displayFolder: 01_Sales Performance
+				lineageTag: d1e2f3a4-b5c6-7890-def0-123456789013
+
+			measure 'Sales Variance' = [Total Sales] - [Sales Target]
+				formatString: $#,##0.00;($#,##0.00);"-"
+				displayFolder: 01_Sales Performance
+				lineageTag: e1f2a3b4-c5d6-7890-ef01-234567890124
+
+			measure 'Sales Variance %' = DIVIDE([Sales Variance], [Sales Target], BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 01_Sales Performance
+				lineageTag: f1a2b3c4-d5e6-7890-f012-345678901235
+
+			measure 'Sales YTD' = CALCULATE([Total Sales], DATESYTD(DimDate[Date]))
+				formatString: $#,##0.00
+				displayFolder: 01_Sales Performance
+				lineageTag: a2b3c4d5-e6f7-8901-abcd-ef2345678906
+
+			measure 'Sales PYTD' = CALCULATE([Total Sales], DATESYTD(SAMEPERIODLASTYEAR(DimDate[Date])))
+				formatString: $#,##0.00
+				displayFolder: 01_Sales Performance
+				lineageTag: b2c3d4e5-f6a7-8901-bcde-f12345678907
+
+			measure 'Sales YoY Growth %' = DIVIDE([Sales YTD] - [Sales PYTD], [Sales PYTD], BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 01_Sales Performance
+				lineageTag: c2d3e4f5-a6b7-8901-cdef-023456789018
+
+			measure 'Sales MoM Growth %' =
+					VAR _CurrentMonth = [Total Sales]
+					VAR _PreviousMonth = CALCULATE([Total Sales], DATEADD(DimDate[Date], -1, MONTH))
+					RETURN DIVIDE(_CurrentMonth - _PreviousMonth, _PreviousMonth, BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 01_Sales Performance
+				lineageTag: d2e3f4a5-b6c7-8901-def0-134567890129
+
+			measure 'Avg Order Value' = DIVIDE([Total Sales], DISTINCTCOUNT(FactSales[OrderID]), BLANK())
+				formatString: $#,##0.00
+				displayFolder: 01_Sales Performance
+				lineageTag: e2f3a4b5-c6d7-8901-ef01-24567890013a
+
+			measure 'Total COGS' = SUMX(FactSales, FactSales[Quantity] * FactSales[UnitCost])
+				formatString: $#,##0.00
+				displayFolder: 02_Profitability
+				lineageTag: f2a3b4c5-d6e7-8901-f012-3456789001ab
+
+			measure 'Gross Profit' = [Total Sales] - [Total COGS]
+				formatString: $#,##0.00
+				displayFolder: 02_Profitability
+				lineageTag: a3b4c5d6-e7f8-9012-abcd-ef34567890bc
+
+			measure 'Gross Margin %' = DIVIDE([Gross Profit], [Total Sales], BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 02_Profitability
+				lineageTag: b3c4d5e6-f7a8-9012-bcde-f034567890cd
+
+			measure 'Total Stock Units' = SUM(FactInventory[Units])
+				formatString: #,##0
+				displayFolder: 03_Supply & Inventory
+				lineageTag: c3d4e5f6-a7b8-9012-cdef-1034567890de
+
+			measure 'Avg Daily Sales (30d)' =
+					CALCULATE(
+					    DIVIDE([Total Quantity Sold], 30),
+					    DATESINPERIOD(DimDate[Date], LASTDATE(DimDate[Date]), -30, DAY)
+					)
+				formatString: #,##0.0
+				displayFolder: 03_Supply & Inventory
+				lineageTag: d3e4f5a6-b7c8-9012-def0-2034567890ef
+
+			measure 'Days of Inventory Cover' = DIVIDE([Total Stock Units], [Avg Daily Sales (30d)], BLANK())
+				formatString: #,##0.0 "days"
+				displayFolder: 03_Supply & Inventory
+				lineageTag: e3f4a5b6-c7d8-9012-ef01-3034567890f0
+
+			measure 'Total Orders' = DISTINCTCOUNT(FactOrderFulfillment[OrderID])
+				formatString: #,##0
+				displayFolder: 04_Fulfillment & Logistics
+				lineageTag: f3a4b5c6-d7e8-9012-f012-4034567890a1
+
+			measure 'On-Time Deliveries' =
+					CALCULATE(
+					    [Total Orders],
+					    FILTER(
+					        FactOrderFulfillment,
+					        FactOrderFulfillment[DeliveryDate] <= FactOrderFulfillment[ShipDate] + 7
+					    )
+					)
+				formatString: #,##0
+				displayFolder: 04_Fulfillment & Logistics
+				lineageTag: a4b5c6d7-e8f9-0123-abcd-ef456789012b
+
+			measure 'OTIF %' = DIVIDE([On-Time Deliveries], [Total Orders], BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 04_Fulfillment & Logistics
+				lineageTag: b4c5d6e7-f8a9-0123-bcde-f0456789023c
+
+			measure 'Avg Lead Time (Days)' =
+					AVERAGEX(
+					    FactOrderFulfillment,
+					    DATEDIFF(
+					        FactOrderFulfillment[OrderDate],
+					        FactOrderFulfillment[DeliveryDate],
+					        DAY
+					    )
+					)
+				formatString: #,##0.0 "days"
+				displayFolder: 04_Fulfillment & Logistics
+				lineageTag: c4d5e6f7-a8b9-0123-cdef-10456789034d
+
+			measure 'Avg Ship-to-Delivery (Days)' =
+					AVERAGEX(
+					    FactOrderFulfillment,
+					    DATEDIFF(
+					        FactOrderFulfillment[ShipDate],
+					        FactOrderFulfillment[DeliveryDate],
+					        DAY
+					    )
+					)
+				formatString: #,##0.0 "days"
+				displayFolder: 04_Fulfillment & Logistics
+				lineageTag: d4e5f6a7-b8c9-0123-def0-20456789045e
+
+			measure 'Total Campaign Spend' = SUM(FactCampaignSpend[Spend])
+				formatString: $#,##0.00
+				displayFolder: 05_Marketing & Campaigns
+				lineageTag: e4f5a6b7-c8d9-0123-ef01-30456789056f
+
+			measure 'Marketing ROI' = DIVIDE([Total Sales], [Total Campaign Spend], BLANK())
+				formatString: #,##0.00"x"
+				displayFolder: 05_Marketing & Campaigns
+				lineageTag: f4a5b6c7-d8e9-0123-f012-40456789067a
+
+			measure 'Revenue per Campaign \$' = DIVIDE([Total Sales], DISTINCTCOUNT(FactCampaignSpend[CampaignKey]), BLANK())
+				formatString: $#,##0.00
+				displayFolder: 05_Marketing & Campaigns
+				lineageTag: a5b6c7d8-e9f0-1234-abcd-ef567890178b
+
+			measure 'Total Customers' = DISTINCTCOUNT(FactSales[CustomerID])
+				formatString: #,##0
+				displayFolder: 06_Customer Analytics
+				lineageTag: b5c6d7e8-f0a1-1234-bcde-f0567890289c
+
+			measure 'Sales per Customer' = DIVIDE([Total Sales], [Total Customers], BLANK())
+				formatString: $#,##0.00
+				displayFolder: 06_Customer Analytics
+				lineageTag: c5d6e7f8-a0b1-1234-cdef-106789039ad
+
+			measure 'Repeat Customer Rate %' =
+					VAR _RepeatCustomers =
+					    COUNTROWS(
+					        FILTER(
+					            ADDCOLUMNS(
+					                VALUES(FactSales[CustomerID]),
+					                "OrderCount", CALCULATE(DISTINCTCOUNT(FactSales[OrderID]))
+					            ),
+					            [OrderCount] > 1
+					        )
+					    )
+					RETURN
+					    DIVIDE(_RepeatCustomers, [Total Customers], BLANK())
+				formatString: 0.0%;(0.0%);"-"
+				displayFolder: 06_Customer Analytics
+				lineageTag: d5e6f7a8-b0c1-1234-def0-2067890ab0be
+
+			measure 'Selected Period Sales' = CALCULATE([Total Sales], ALLSELECTED(DimDate))
+				formatString: $#,##0.00
+				displayFolder: 07_Dynamic & Context
+				lineageTag: e5f6a7b8-c0d1-1234-ef01-3067890bc0cf
+
+			measure 'Running Total Sales' =
+					CALCULATE(
+					    [Total Sales],
+					    FILTER(
+					        ALL(DimDate[Date]),
+					        DimDate[Date] <= MAX(DimDate[Date])
+					    )
+					)
+				formatString: $#,##0.00
+				displayFolder: 07_Dynamic & Context
+				lineageTag: f5a6b7c8-d0e1-1234-f012-4067890cd0d0
+
+			measure 'Sales Rolling 3M' =
+					CALCULATE(
+					    [Total Sales],
+					    DATESINPERIOD(DimDate[Date], LASTDATE(DimDate[Date]), -3, MONTH)
+					)
+				formatString: $#,##0.00
+				displayFolder: 07_Dynamic & Context
+				lineageTag: a6b7c8d9-e0f1-2345-abcd-ef678901e0e1
+
+			measure System_Metadata_HTML =
+					
+					VAR LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "MMMM DD, YYYY hh:mm AM/PM")
+					VAR ActiveCampaigns = CALCULATE(COUNTROWS('DimCampaign'))
+					VAR TotalStock = FORMAT([Total Stock Units], "#,##0")
+					
+					RETURN
+					"<div style='font-family: Segoe UI, sans-serif; padding: 15px; background-color: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; box-shadow: 2px 2px 4px rgba(0,0,0,0.05);'>
+					    <h3 style='color: #1E3A8A; margin-top: 0; font-size: 16px; font-weight: 600;'>System & Data Status</h3>
+					    <hr style='border: none; border-top: 1px solid #E5E7EB; margin-bottom: 10px;' />
+					    <table style='width: 100%; font-size: 13px; color: #64748B; border-collapse: collapse;'>
+					        <tr>
+					            <td style='padding: 4px 0;'><strong>Last Data Refresh:</strong></td>
+					            <td style='text-align: right;'>" & LastRefreshDate & "</td>
+					        </tr>
+					        <tr>
+					            <td style='padding: 4px 0;'><strong>Active Marketing Campaigns:</strong></td>
+					            <td style='text-align: right;'>" & ActiveCampaigns & "</td>
+					        </tr>
+					        <tr>
+					            <td style='padding: 4px 0;'><strong>Monitored Stock Units:</strong></td>
+					            <td style='text-align: right;'>" & TotalStock & "</td>
+					        </tr>
+					    </table>
+					</div>"
+				displayFolder: 00_HTML & UI/UX
+				lineageTag: 46b23cd1-2143-4f3b-b047-089e6c96406a
+
+			measure UI_4K_LandingPage_Refined = ```
+					
+					// 1. Dynamic User Context
+					VAR CurrentUserEmail = USERPRINCIPALNAME()
+					VAR DotPosition = SEARCH(".", CurrentUserEmail, 1, 0)
+					VAR UserFirstName = IF(DotPosition > 0 && DotPosition < SEARCH("@", CurrentUserEmail, 1, 0), UPPER(LEFT(CurrentUserEmail, 1)) & MID(CurrentUserEmail, 2, DotPosition - 2), "Sohila")
+					
+					// 2. High-Level Model Aggregations
+					VAR RefreshDate = FORMAT(MAX('DimDate'[Date]), "MMMM DD, YYYY")
+					VAR MetricRevenue = FORMAT(SUM('FactSales'[LineTotal]), "$#,##0")
+					VAR MetricOrders = FORMAT(COUNTROWS('FactSales'), "#,##0")
+					VAR MetricCustomers = FORMAT(DISTINCTCOUNT('FactSales'[CustomerID]), "#,##0")
+					VAR MetricStock = FORMAT(SUM('FactInventory'[Units]), "#,##0")
+					VAR MetricCampaigns = FORMAT(COUNTROWS('DimCampaign'), "0")
+					VAR MetricSpend = FORMAT(SUM('FactCampaignSpend'[Spend]), "$#,##0")
+					
+					RETURN
+					"<!DOCTYPE html>
+					<html style='height: 100%; width: 100%; margin: 0; padding: 0;'>
+					<head>
+					<meta charset='UTF-8'>
+					<style>
+					    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+					    
+					    /* Hardware-Accelerated Animations */
+					    @keyframes fadeInUp {
+					        from { opacity: 0; transform: translate3d(0, 4vh, 0); }
+					        to { opacity: 1; transform: translate3d(0, 0, 0); }
+					    }
+					    
+					    @keyframes floatOrb {
+					        0% { transform: translate3d(0, 0, 0) scale(1); }
+					        50% { transform: translate3d(0, -4vh, 0) scale(1.05); }
+					        100% { transform: translate3d(0, 0, 0) scale(1); }
+					    }
+					    
+					    @keyframes pulseGlow {
+					        0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+					        70% { box-shadow: 0 0 0 1.5vw rgba(99, 102, 241, 0); }
+					        100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+					    }
+					
+					    body {
+					        margin: 0;
+					        padding: 0;
+					        width: 100vw;
+					        height: 100vh;
+					        background-color: #0B0F19;
+					        background-image: 
+					            radial-gradient(circle at 15% 20%, rgba(30, 58, 138, 0.25) 0%, transparent 45%),
+					            radial-gradient(circle at 85% 80%, rgba(124, 58, 237, 0.2) 0%, transparent 45%);
+					        display: flex;
+					        align-items: center;
+					        justify-content: center;
+					        font-family: 'Outfit', 'Segoe UI', sans-serif;
+					        overflow: hidden;
+					        box-sizing: border-box;
+					    }
+					
+					    /* Ambient Orbs - Optimized with will-change */
+					    .orb {
+					        position: absolute;
+					        border-radius: 50%;
+					        filter: blur(8vw);
+					        z-index: 1;
+					        pointer-events: none;
+					        will-change: transform;
+					    }
+					
+					    .orb-1 {
+					        width: 45vw; height: 45vw;
+					        background: rgba(59, 130, 246, 0.12);
+					        top: -10vw; left: 5vw;
+					        animation: floatOrb 20s infinite ease-in-out;
+					    }
+					
+					    .orb-2 {
+					        width: 50vw; height: 50vw;
+					        background: rgba(124, 58, 237, 0.1);
+					        bottom: -15vw; right: 5vw;
+					        animation: floatOrb 24s infinite ease-in-out -5s;
+					    }
+					
+					    .wrapper {
+					        display: flex;
+					        flex-direction: column;
+					        justify-content: space-between;
+					        width: 90vw;
+					        height: 88vh;
+					        margin: auto;
+					        z-index: 2;
+					        box-sizing: border-box;
+					    }
+					
+					    /* Header Bar */
+					    .header-bar {
+					        display: flex;
+					        justify-content: space-between;
+					        align-items: center;
+					        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+					        padding-bottom: 2vh;
+					        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+					    }
+					
+					    .brand { display: flex; align-items: center; gap: 0.8vw; }
+					    .brand-icon { font-size: 2vw; }
+					    .brand-text { font-size: 1.6vw; font-weight: 700; letter-spacing: 0.1vw; color: #FFFFFF; }
+					
+					    .metadata-badges { display: flex; gap: 1vw; }
+					    .badge {
+					        background: rgba(255, 255, 255, 0.03);
+					        border: 1px solid rgba(255, 255, 255, 0.08);
+					        border-radius: 2vw;
+					        padding: 0.6vh 1.2vw;
+					        font-size: 0.9vw;
+					        color: #94A3B8;
+					        display: flex;
+					        align-items: center;
+					        gap: 0.5vw;
+					        backdrop-filter: blur(4px);
+					    }
+					    .badge strong { color: #E2E8F0; font-weight: 600; }
+					    .dot { width: 0.5vw; height: 0.5vw; border-radius: 50%; background: #10B981; box-shadow: 0 0 0.5vw #10B981; }
+					
+					    /* Hero Panel */
+					    .hero-panel {
+					        text-align: center;
+					        margin-top: 3vh;
+					        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+					        opacity: 0;
+					    }
+					    .hero-pre { font-size: 1vw; font-weight: 700; color: #38BDF8; letter-spacing: 0.2vw; text-transform: uppercase; margin-bottom: 1vh; }
+					    .hero-title { font-size: 4vw; font-weight: 800; color: #FFFFFF; margin: 0; letter-spacing: -0.05vw; line-height: 1.1; }
+					    .hero-title strong { 
+					        background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%);
+					        -webkit-background-clip: text;
+					        -webkit-text-fill-color: transparent;
+					    }
+					    .hero-desc { font-size: 1.2vw; color: #94A3B8; line-height: 1.6; margin: 1.5vh auto 0 auto; max-width: 55vw; }
+					
+					    /* Staggered Card Grid */
+					    .card-grid {
+					        display: grid;
+					        grid-template-columns: repeat(4, 1fr);
+					        gap: 1.5vw;
+					        margin: 4vh 0;
+					        width: 100%;
+					    }
+					
+					    .card {
+					        background: rgba(15, 23, 42, 0.5);
+					        border-radius: 1vw;
+					        border: 1px solid rgba(255, 255, 255, 0.05);
+					        padding: 2vw;
+					        display: flex;
+					        flex-direction: column;
+					        justify-content: space-between;
+					        height: 32vh;
+					        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+					        cursor: pointer;
+					        opacity: 0;
+					        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+					        backdrop-filter: blur(12px);
+					        will-change: transform;
+					    }
+					
+					    /* Staggered Entrance */
+					    .card:nth-child(1) { animation-delay: 0.2s; }
+					    .card:nth-child(2) { animation-delay: 0.3s; }
+					    .card:nth-child(3) { animation-delay: 0.4s; }
+					    .card:nth-child(4) { animation-delay: 0.5s; }
+					
+					    .card:hover {
+					        transform: translate3d(0, -1vh, 0);
+					        background: rgba(30, 41, 59, 0.7);
+					    }
+					    .card:nth-child(1):hover { border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 1vh 3vh rgba(59, 130, 246, 0.15); }
+					    .card:nth-child(2):hover { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 1vh 3vh rgba(16, 185, 129, 0.15); }
+					    .card:nth-child(3):hover { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 1vh 3vh rgba(245, 158, 11, 0.15); }
+					    .card:nth-child(4):hover { border-color: rgba(236, 72, 153, 0.5); box-shadow: 0 1vh 3vh rgba(236, 72, 153, 0.15); }
+					
+					    .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+					    .card-icon {
+					        width: 3.5vw; height: 3.5vw;
+					        border-radius: 0.8vw;
+					        display: flex; align-items: center; justify-content: center;
+					        font-size: 1.8vw;
+					    }
+					    .card:nth-child(1) .card-icon { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+					    .card:nth-child(2) .card-icon { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+					    .card:nth-child(3) .card-icon { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+					    .card:nth-child(4) .card-icon { background: rgba(236, 72, 153, 0.15); color: #F472B6; }
+					
+					    .card-arrow { font-size: 1.5vw; color: #475569; transition: transform 0.3s ease; }
+					    .card:hover .card-arrow { transform: translateX(0.5vw); }
+					    
+					    .card-info { margin-top: auto; }
+					    .card-title { font-size: 1.4vw; font-weight: 600; color: #FFFFFF; margin: 0 0 0.5vh 0; }
+					    .card-desc { font-size: 0.95vw; color: #94A3B8; line-height: 1.5; margin: 0 0 2vh 0; }
+					
+					    /* Web-like Metric Pills */
+					    .data-pills { display: flex; flex-wrap: wrap; gap: 0.5vw; }
+					    .pill {
+					        background: rgba(255, 255, 255, 0.05);
+					        border: 1px solid rgba(255, 255, 255, 0.1);
+					        padding: 0.4vh 0.8vw;
+					        border-radius: 0.4vw;
+					        font-size: 0.85vw;
+					        color: #E2E8F0;
+					        display: flex;
+					        align-items: center;
+					        gap: 0.4vw;
+					    }
+					    .pill-val { font-weight: 700; color: #FFFFFF; }
+					
+					    /* CTA Area */
+					    .launch-area {
+					        display: flex; justify-content: center; margin-top: 1vh;
+					        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+					        opacity: 0;
+					    }
+					    .launch-btn {
+					        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+					        color: #FFFFFF;
+					        font-size: 1.2vw;
+					        font-weight: 700;
+					        padding: 1.2vw 4vw;
+					        border-radius: 4vw;
+					        cursor: pointer;
+					        border: 1px solid rgba(255, 255, 255, 0.1);
+					        animation: pulseGlow 3s infinite;
+					        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+					        letter-spacing: 0.1vw;
+					        text-transform: uppercase;
+					        box-shadow: 0 1vh 2vh rgba(79, 70, 229, 0.3);
+					    }
+					    .launch-btn:hover { transform: scale(1.03); box-shadow: 0 1.5vh 3vh rgba(124, 58, 237, 0.5); }
+					
+					</style>
+					</head>
+					<body>
+					    <div class='orb orb-1'></div>
+					    <div class='orb orb-2'></div>
+					
+					    <div class='wrapper'>
+					        <div class='header-bar'>
+					            <div class='brand'>
+					                <span class='brand-text'>S&OP INTELLIGENCE</span>
+					            </div>
+					            <div class='metadata-badges'>
+					                <div class='badge'><span class='dot'></span>Environment: <strong>Production</strong></div>
+					                <div class='badge'>Sync: <strong>" & RefreshDate & "</strong></div>
+					                <div class='badge'>Engine: <strong>DeepClean OS</strong></div>
+					            </div>
+					        </div>
+					
+					        <div class='hero-panel'>
+					            <div class='hero-pre'>Control Center Active</div>
+					            <h1 class='hero-title'>Welcome back, <strong>" & UserFirstName & "</strong></h1>
+					            <p class='hero-desc'>Enterprise demand planning, customer channels, logistics status, and marketing ROI cubes have successfully updated. Select an operations portal below to begin analysis.</p>
+					        </div>
+					
+					        <div class='card-grid'>
+					            <!-- Card 1: Finance -->
+					            <div class='card'>
+					                <div class='card-top'>
+					                    <div class='card-icon'>📈</div>
+					                    <div class='card-arrow'>→</div>
+					                </div>
+					                <div class='card-info'>
+					                    <h3 class='card-title'>Executive Summary</h3>
+					                    <p class='card-desc'>Track aggregate revenues and dynamic targets.</p>
+					                    <div class='data-pills'>
+					                        <div class='pill'>Rev: <span class='pill-val'>" & MetricRevenue & "</span></div>
+					                        <div class='pill'>Orders: <span class='pill-val'>" & MetricOrders & "</span></div>
+					                    </div>
+					                </div>
+					            </div>
+					
+					            <!-- Card 2: Customers -->
+					            <div class='card'>
+					                <div class='card-top'>
+					                    <div class='card-icon'>👥</div>
+					                    <div class='card-arrow'>→</div>
+					                </div>
+					                <div class='card-info'>
+					                    <h3 class='card-title'>Demand & Customers</h3>
+					                    <p class='card-desc'>Deep dive into segmentations and geographic maps.</p>
+					                    <div class='data-pills'>
+					                        <div class='pill'>Active Accounts: <span class='pill-val'>" & MetricCustomers & "</span></div>
+					                    </div>
+					                </div>
+					            </div>
+					
+					            <!-- Card 3: Logistics -->
+					            <div class='card'>
+					                <div class='card-top'>
+					                    <div class='card-icon'>📦</div>
+					                    <div class='card-arrow'>→</div>
+					                </div>
+					                <div class='card-info'>
+					                    <h3 class='card-title'>Inventory & Logistics</h3>
+					                    <p class='card-desc'>Monitor capacities, days of cover, and shipping.</p>
+					                    <div class='data-pills'>
+					                        <div class='pill'>Stock Units: <span class='pill-val'>" & MetricStock & "</span></div>
+					                    </div>
+					                </div>
+					            </div>
+					
+					            <!-- Card 4: Marketing -->
+					            <div class='card'>
+					                <div class='card-top'>
+					                    <div class='card-icon'>📢</div>
+					                    <div class='card-arrow'>→</div>
+					                </div>
+					                <div class='card-info'>
+					                    <h3 class='card-title'>Marketing & ROI</h3>
+					                    <p class='card-desc'>Evaluate budgets, CTRs, and conversion indexes.</p>
+					                    <div class='data-pills'>
+					                        <div class='pill'>Campaigns: <span class='pill-val'>" & MetricCampaigns & "</span></div>
+					                        <div class='pill'>Spend: <span class='pill-val'>" & MetricSpend & "</span></div>
+					                    </div>
+					                </div>
+					            </div>
+					        </div>
+					
+					        <div class='launch-area'>
+					            <button class='launch-btn'>Launch Workspace</button>
+					        </div>
+					    </div>
+					</body>
+					</html>"
+					```
+				displayFolder: 00_HTML & UI/UX
+				lineageTag: c24854a0-be84-4227-82e7-62895f2f823e
+
+			column Value
+				isHidden
+				lineageTag: cabf892f-0e48-4e97-86a5-bbc4fc7ec7d1
+				isNameInferred
+				sourceColumn: [Value]
+
+			partition KeyMeasures = calculated
+				mode: import
+				source = {(BLANK())}
+
+			annotation PBI_ResultType = Table
+
+			annotation PBI_NavigationStepName = Navigation
+
 		relationship 79955cb1-6507-a07e-c220-b47283ff2ee2
 			fromColumn: FactSales.FlagKey
 			toColumn: DimOrderFlags.FlagKey
@@ -1090,6 +1683,7 @@ createOrReplace
 			toColumn: DimCampaign.CampaignKey
 
 		relationship d3b8bdbb-ebde-9110-d56c-3bbb75da3851
+			crossFilteringBehavior: bothDirections
 			fromColumn: FactPromotionCoverage.ProductKey
 			toColumn: DimProduct.ProductKey
 
@@ -1130,8 +1724,6 @@ createOrReplace
 			toColumn: DimDate.Date
 
 		relationship f0c93f68-3f6d-c5ce-69d8-234572cf47a5
-			crossFilteringBehavior: bothDirections
-			fromCardinality: one
 			fromColumn: DimDate.Date
 			toColumn: FactSalesTargets.Period
 
@@ -1140,14 +1732,24 @@ createOrReplace
 			fromColumn: DimCustomer.City
 			toColumn: DimGeo.City
 
-		relationship f60fd889-2543-da30-ea36-7253b7c57d69
-			fromColumn: DimCustomer.Region
-			toColumn: Security.Region
+		role 'Regional Sales Rep'
+			modelPermission: read
 
-		relationship 4ea9a23f-0b80-b249-5576-f9153d870c27
-			isActive: false
-			fromColumn: DimGeo.Region
-			toColumn: Security.Region
+			tablePermission DimCustomer = [Region] = LOOKUPVALUE(Security[Region], Security[UserEmail], USERPRINCIPALNAME())
+
+			tablePermission DimGeo = [Region] = LOOKUPVALUE(Security[Region], Security[UserEmail], USERPRINCIPALNAME())
+
+			annotation PBI_Id = 2818dbba4fcd47d494b7a96c223985cc
+
+		role Executive
+			modelPermission: read
+
+			annotation PBI_Id = 9c0ef896914b4597abfb400ea5895df0
+
+		role Admin
+			modelPermission: readRefresh
+
+			annotation PBI_Id = 4ce4c1b260cd4073b86260643f8de2c4
 
 		cultureInfo en-US
 
@@ -1472,6 +2074,19 @@ createOrReplace
 
 			annotation PBI_ResultType = Table
 
+		expression ExcelSource =
+				let
+				  Source = Excel.Workbook(File.Contents("D:\courses\Data Science\powerbi-ultimate-course\powerbi-ultimate-course\project_nightmare_datamodel\dataset.xlsx"), null, true),
+				  Buffered = Table.Buffer(Source)
+				in
+				  Buffered
+			lineageTag: e8d7a6f2-a5b6-7890-bcde-f01234567890
+			queryGroup: 01_Staging
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
 		queryGroup 01_Staging
 
 			annotation PBI_QueryGroupOrder = 0
@@ -1490,7 +2105,7 @@ createOrReplace
 
 		annotation __PBI_TimeIntelligenceEnabled = 0
 
-		annotation PBI_QueryOrder = ["Address","CAMPAIGN_LOG","CUST_MASTER","INVOICES","ORDERS_2025","ORDERS_2026","campaign_skus","cities","customer_contacts","exchange_rates","inventory","invoice_lines","order_line_items","payments","products","regions","sales_targets","Security","shipments","subcategories","user_details","DimCustomer","DimProduct","DimOrderFlags","DimGeo","DimCampaign","DimDate","orders","channels","FactSales","FactInventory","FactCampaignSpend","FactPromotionCoverage","FactOrderFulfillment","FactSalesTargets"]
+		annotation PBI_QueryOrder = ["ExcelSource","Address","CAMPAIGN_LOG","CUST_MASTER","INVOICES","ORDERS_2025","ORDERS_2026","campaign_skus","cities","customer_contacts","exchange_rates","inventory","invoice_lines","order_line_items","payments","products","regions","sales_targets","Security","shipments","subcategories","user_details","DimCustomer","DimProduct","DimOrderFlags","DimGeo","DimCampaign","DimDate","orders","channels","FactSales","FactInventory","FactCampaignSpend","FactPromotionCoverage","FactOrderFulfillment","FactSalesTargets"]
 
-		annotation PBI_ProTooling = ["DevMode","TMDLView_Desktop"]
+		annotation PBI_ProTooling = ["DevMode","TMDLView_Desktop","MCP-PBIModeling"]
 

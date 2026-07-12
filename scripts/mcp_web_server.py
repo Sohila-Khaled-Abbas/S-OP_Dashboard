@@ -181,6 +181,19 @@ class ChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
 
+class CalcGroupRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+    precedence: Optional[int] = None
+
+class RoleRequest(BaseModel):
+    name: str
+    modelPermission: str = "read"
+
+class RoleMemberRequest(BaseModel):
+    roleName: str
+    memberName: str
+
 # ---------------------------------------------------------------------------
 # API endpoints
 # ---------------------------------------------------------------------------
@@ -338,6 +351,82 @@ async def create_or_update_measure(req: MeasureRequest):
 async def list_relationships():
     return await call_mcp("relationship_operations", {
         "request": {"operation": "List"}
+    })
+
+
+@app.get("/api/calc_groups")
+async def list_calc_groups():
+    return await call_mcp("calculation_group_operations", {
+        "request": {"operation": "List"}
+    })
+
+
+@app.post("/api/calc_groups")
+async def create_calc_group(req: CalcGroupRequest):
+    return await call_mcp("calculation_group_operations", {
+        "request": {
+            "operation": "Create",
+            "definitions": [{"name": req.name, "description": req.description, "precedence": req.precedence}]
+        }
+    })
+
+
+@app.get("/api/roles")
+async def list_roles():
+    return await call_mcp("security_role_operations", {
+        "request": {"operation": "List"}
+    })
+
+
+@app.post("/api/roles")
+async def create_role(req: RoleRequest):
+    return await call_mcp("security_role_operations", {
+        "request": {
+            "operation": "Create",
+            "definitions": [{"name": req.name, "modelPermission": req.modelPermission}]
+        }
+    })
+
+
+@app.post("/api/roles/members")
+async def add_role_member(req: RoleMemberRequest):
+    return await call_mcp("security_role_operations", {
+        "request": {
+            "operation": "AddMember",
+            "roleName": req.roleName,
+            "memberName": req.memberName
+        }
+    })
+
+
+@app.get("/api/partitions")
+async def list_partitions(table: str):
+    return await call_mcp("partition_operations", {
+        "request": {
+            "operation": "List",
+            "references": [{"name": table}]
+        }
+    })
+
+
+@app.post("/api/database/backup")
+async def backup_database():
+    return await call_mcp("database_operations", {
+        "request": {"operation": "Backup"}
+    })
+
+
+@app.post("/api/database/sync")
+async def sync_database():
+    return await call_mcp("database_operations", {
+        "request": {"operation": "Sync"}
+    })
+
+
+@app.post("/api/database/save")
+async def save_database():
+    return await call_mcp("model_operations", {
+        "request": {"operation": "SaveChanges"}
     })
 
 

@@ -5,5 +5,20 @@
   "displayOption": "FitToPage",
   "height": 2160,
   "width": 3840,
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "width": {
+            "expr": {
+              "Literal": {
+                "Value": "186L"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
   "visibility": "HiddenInViewMode"
 }

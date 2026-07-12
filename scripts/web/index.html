@@ -54,10 +54,14 @@
   <!-- ============ MAIN CONTENT ============ -->
   <main class="main">
     <!-- Tabs -->
-    <div class="tabs">
+    <div class="tabs" style="flex-wrap: wrap;">
       <div class="tab active" data-tab="dax" onclick="switchTab('dax')">⚡ DAX Query</div>
       <div class="tab" data-tab="measures" onclick="switchTab('measures')">📐 Measures</div>
       <div class="tab" data-tab="relationships" onclick="switchTab('relationships')">🔗 Relationships</div>
+      <div class="tab" data-tab="calc-groups" onclick="switchTab('calc-groups')">🧮 Calc Groups</div>
+      <div class="tab" data-tab="roles" onclick="switchTab('roles')">🔒 Roles (RLS)</div>
+      <div class="tab" data-tab="partitions" onclick="switchTab('partitions')">📂 Partitions</div>
+      <div class="tab" data-tab="database" onclick="switchTab('database')">⚙️ Database Ops</div>
     </div>
 
     <div class="tab-panels">
@@ -131,6 +135,66 @@
         <div class="results-area" id="rel-results" style="padding:16px;">
           <div class="results-empty" style="height:200px;">
             <p>Connect to load relationships</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calc Groups Panel -->
+      <div class="tab-panel" id="panel-calc-groups">
+        <div class="measure-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Name</label><input type="text" id="cg-name" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Precedence</label><input type="number" id="cg-precedence" class="form-input"></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveCalcGroup()">💾 Create Calc Group</button>
+        </div>
+        <div id="cg-list" style="margin-top:20px;padding:16px;"></div>
+      </div>
+      
+      <!-- Roles Panel -->
+      <div class="tab-panel" id="panel-roles">
+        <div class="measure-form">
+          <div class="form-group"><label class="form-label">Role Name</label><input type="text" id="role-name" class="form-input"></div>
+          <button class="btn btn-primary" onclick="createRole()">💾 Create Role</button>
+        </div>
+        <div id="roles-list" style="margin-top:20px;padding:16px;"></div>
+      </div>
+      
+      <!-- Partitions Panel -->
+      <div class="tab-panel" id="panel-partitions">
+        <div class="measure-form">
+          <div class="form-group"><label class="form-label">Select Table</label><select id="part-table" class="form-input" onchange="loadPartitions()"></select></div>
+        </div>
+        <div id="partitions-list" style="margin-top:20px;padding:16px;"></div>
+      </div>
+      
+      <!-- Database Ops Panel -->
+      <div class="tab-panel" id="panel-database">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px;">
+          <div class="measure-card" style="text-align:center;padding:30px;">
+            <h3>💾 Save Changes</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:15px;">Commit structural changes back to the .pbip model</p>
+            <button class="btn btn-primary" onclick="dbOp('save')">Save Model</button>
+          </div>
+          <div class="measure-card" style="text-align:center;padding:30px;">
+            <h3>🔄 Sync DB</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:15px;">Sync Analysis Services database with local changes</p>
+            <button class="btn btn-primary" onclick="dbOp('sync')">Sync Database</button>
+          </div>
+          <div class="measure-card" style="text-align:center;padding:30px;">
+            <h3>📦 Backup</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:15px;">Create an ABF backup of the current database</p>
+            <button class="btn btn-primary" onclick="dbOp('backup')">Backup</button>
+          </div>
+          <div class="measure-card" style="text-align:center;padding:30px;">
+            <h3>🧹 Clear Cache</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:15px;">Clear the DAX evaluation cache</p>
+            <button class="btn btn-primary" onclick="dbOp('clear-cache')">Clear Cache</button>
+          </div>
+          <div class="measure-card" style="text-align:center;padding:30px;grid-column:1 / -1;">
+            <h3>⚡ Refresh All Data</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:15px;">Trigger XMLA refresh for all model tables</p>
+            <button class="btn btn-danger" onclick="dbOp('refresh-all')">Refresh All Data</button>
           </div>
         </div>
       </div>
@@ -358,10 +422,13 @@ function fillMeasure(name, table) {
 
 function populateTableDropdown() {
   const sel = document.getElementById('m-table');
+  const psel = document.getElementById('part-table');
   sel.innerHTML = '<option value="">Select table...</option>';
+  psel.innerHTML = '<option value="">Select table...</option>';
   for (const t of allTables) {
     const name = t.name || t.tableName || '';
     sel.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+    psel.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
   }
 }
 
@@ -508,6 +575,87 @@ async function loadRelationships() {
 }
 
 // ========================================================================
+// EXTENDED MCP OPERATIONS (Calc Groups, Roles, Partitions, DB)
+// ========================================================================
+
+async function dbOp(op) {
+  try {
+    let endpoint = `/api/optimize/${op}`;
+    if (['backup', 'save', 'sync'].includes(op)) endpoint = `/api/database/${op}`;
+    
+    toast(`Running ${op}...`, 'info');
+    await apiCall(endpoint, { method: 'POST' });
+    toast(`${op} completed successfully!`, 'success');
+  } catch (e) { }
+}
+
+async function loadCalcGroups() {
+  const container = document.getElementById('cg-list');
+  try {
+    const resp = await apiCall('/api/calc_groups');
+    const items = resp.data || [];
+    if (!items.length) { container.innerHTML = '<div class="results-empty">No calculation groups</div>'; return; }
+    let html = '';
+    for (const item of items) {
+       html += `<div class="measure-card"><h4>${esc(item.name)}</h4><p style="color:var(--text-muted)">Precedence: ${item.precedence}</p></div>`;
+    }
+    container.innerHTML = html;
+  } catch(e){}
+}
+
+async function saveCalcGroup() {
+  const name = document.getElementById('cg-name').value;
+  const precedence = document.getElementById('cg-precedence').value;
+  if (!name) { toast('Name required', 'error'); return; }
+  try {
+    await apiCall('/api/calc_groups', { method: 'POST', body: JSON.stringify({ name, precedence: parseInt(precedence) || 0 }) });
+    toast('Calc group created', 'success');
+    loadCalcGroups();
+  } catch(e){}
+}
+
+async function loadRoles() {
+  const container = document.getElementById('roles-list');
+  try {
+    const resp = await apiCall('/api/roles');
+    const items = resp.data || [];
+    if (!items.length) { container.innerHTML = '<div class="results-empty">No roles found</div>'; return; }
+    let html = '';
+    for (const item of items) {
+       html += `<div class="measure-card"><h4>${esc(item.name)}</h4><p style="color:var(--text-muted)">Members: ${(item.members||[]).map(m=>m.memberName).join(', ')}</p></div>`;
+    }
+    container.innerHTML = html;
+  } catch(e){}
+}
+
+async function createRole() {
+  const name = document.getElementById('role-name').value;
+  if (!name) { toast('Name required', 'error'); return; }
+  try {
+    await apiCall('/api/roles', { method: 'POST', body: JSON.stringify({ name }) });
+    toast('Role created', 'success');
+    loadRoles();
+  } catch(e){}
+}
+
+async function loadPartitions() {
+  const table = document.getElementById('part-table').value;
+  const container = document.getElementById('partitions-list');
+  if (!table) return;
+  try {
+    const resp = await apiCall(`/api/partitions?table=${encodeURIComponent(table)}`);
+    const items = resp.data || [];
+    if (!items.length) { container.innerHTML = '<div class="results-empty">No partitions found</div>'; return; }
+    let html = '<table class="results-table"><thead><tr><th>Name</th><th>Mode</th><th>State</th></tr></thead><tbody>';
+    for (const item of items) {
+       html += `<tr><td>${esc(item.name)}</td><td>${esc(item.mode)}</td><td>${esc(item.state)}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch(e){}
+}
+
+// ========================================================================
 // CHAT
 // ========================================================================
 async function sendChat() {
@@ -611,8 +759,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('mcp-status-text').textContent = 'Server offline';
   }
 
-  // Load relationships when tab is clicked
+  // Load data when tabs are clicked
   document.querySelector('[data-tab="relationships"]').addEventListener('click', loadRelationships);
+  document.querySelector('[data-tab="calc-groups"]').addEventListener('click', loadCalcGroups);
+  document.querySelector('[data-tab="roles"]').addEventListener('click', loadRoles);
 });
 
 // Keyboard shortcuts
