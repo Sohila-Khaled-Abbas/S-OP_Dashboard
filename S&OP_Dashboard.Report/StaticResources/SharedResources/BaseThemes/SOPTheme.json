@@ -16,24 +16,24 @@
   "textClasses": {
     "callout": {
       "fontSize": 24,
-      "fontFamily": "Inter, Segoe UI",
+      "fontFace": "Inter, Segoe UI",
       "color": "#1E3A8A"
     },
     "title": {
       "fontSize": 12,
-      "fontFamily": "Inter, Segoe UI",
+      "fontFace": "Inter, Segoe UI",
       "color": "#111827",
       "fontWeight": "Bold"
     },
     "header": {
       "fontSize": 10,
-      "fontFamily": "Inter, Segoe UI",
+      "fontFace": "Inter, Segoe UI",
       "color": "#374151",
       "fontWeight": "SemiBold"
     },
     "body": {
       "fontSize": 9,
-      "fontFamily": "Inter, Segoe UI",
+      "fontFace": "Inter, Segoe UI",
       "color": "#4B5563"
     }
   },
@@ -70,7 +70,7 @@
           {
             "show": true,
             "background": { "solid": { "color": "#FFFFFF" } },
-            "border": { "solid": { "color": "#F3F4F6" } }
+            "foreground": { "solid": { "color": "#64748B" } }
           }
         ]
       }
