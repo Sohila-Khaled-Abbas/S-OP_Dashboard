@@ -17,7 +17,7 @@
 - **[FactPromotionCoverage](#factpromotioncoverage)** (Fact) — 2 Columns, 0 Measures
 - **[FactSales](#factsales)** (Fact) — 13 Columns, 0 Measures
 - **[FactSalesTargets](#factsalestargets)** (Fact) — 2 Columns, 0 Measures
-- **[KeyMeasures](#keymeasures)** (Fact) — 1 Columns, 29 Measures
+- **[KeyMeasures](#keymeasures)** (Fact) — 1 Columns, 31 Measures
 - **[Security](#security)** (Fact) — 2 Columns, 0 Measures
 
 ---
@@ -270,6 +270,8 @@
 | **`'Repeat Customer Rate`** | `VAR _RepeatCustomers = COUNTROWS( FILTER( ADDCOLUMNS( VAL...` | - |
 | **`'Selected Period Sales'`** | `CALCULATE([Total Sales], ALLSELECTED(DimDate)) formatStri...` | - |
 | **`'Running Total Sales'`** | `CALCULATE( [Total Sales], FILTER( ALL(DimDate[Date]), Dim...` | - |
+| **`'Sales Rolling 3M'`** | `CALCULATE( [Total Sales], DATESINPERIOD(DimDate[Date], LA...` | - |
+| **`System_Metadata_HTML`** | `VAR LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "...` | - |
 
 ---
 
