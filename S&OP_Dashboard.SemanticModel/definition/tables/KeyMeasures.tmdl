@@ -2,98 +2,98 @@ table KeyMeasures
 	lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 	measure 'Total Sales' = SUM(FactSales[LineTotal])
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 01_Sales Performance
 		lineageTag: b1c2d3e4-f5a6-7890-bcde-f01234567891
 
 	measure 'Total Quantity Sold' = SUM(FactSales[Quantity])
-		formatString: "#,##0"
+		formatString: #,##0
 		displayFolder: 01_Sales Performance
 		lineageTag: c1d2e3f4-a5b6-7890-cdef-012345678902
 
-	measure 'Sales Target' = SUM(FactSalesTargets[TargetAmount])
-		formatString: "$#,##0.00"
+	measure 'Sales Target' = SUM(FactSalesTargets[TargetRevenue])
+		formatString: $#,##0.00
 		displayFolder: 01_Sales Performance
 		lineageTag: d1e2f3a4-b5c6-7890-def0-123456789013
 
 	measure 'Sales Variance' = [Total Sales] - [Sales Target]
-		formatString: "$#,##0.00;($#,##0.00);""-"""
+		formatString: $#,##0.00;($#,##0.00);"-"
 		displayFolder: 01_Sales Performance
 		lineageTag: e1f2a3b4-c5d6-7890-ef01-234567890124
 
 	measure 'Sales Variance %' = DIVIDE([Sales Variance], [Sales Target], BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 01_Sales Performance
 		lineageTag: f1a2b3c4-d5e6-7890-f012-345678901235
 
 	measure 'Sales YTD' = CALCULATE([Total Sales], DATESYTD(DimDate[Date]))
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 01_Sales Performance
 		lineageTag: a2b3c4d5-e6f7-8901-abcd-ef2345678906
 
 	measure 'Sales PYTD' = CALCULATE([Total Sales], DATESYTD(SAMEPERIODLASTYEAR(DimDate[Date])))
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 01_Sales Performance
 		lineageTag: b2c3d4e5-f6a7-8901-bcde-f12345678907
 
 	measure 'Sales YoY Growth %' = DIVIDE([Sales YTD] - [Sales PYTD], [Sales PYTD], BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 01_Sales Performance
 		lineageTag: c2d3e4f5-a6b7-8901-cdef-023456789018
 
-	measure 'Sales MoM Growth %' = 
+	measure 'Sales MoM Growth %' =
 			VAR _CurrentMonth = [Total Sales]
 			VAR _PreviousMonth = CALCULATE([Total Sales], DATEADD(DimDate[Date], -1, MONTH))
 			RETURN DIVIDE(_CurrentMonth - _PreviousMonth, _PreviousMonth, BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 01_Sales Performance
 		lineageTag: d2e3f4a5-b6c7-8901-def0-134567890129
 
 	measure 'Avg Order Value' = DIVIDE([Total Sales], DISTINCTCOUNT(FactSales[OrderID]), BLANK())
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 01_Sales Performance
 		lineageTag: e2f3a4b5-c6d7-8901-ef01-24567890013a
 
 	measure 'Total COGS' = SUMX(FactSales, FactSales[Quantity] * FactSales[UnitCost])
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 02_Profitability
 		lineageTag: f2a3b4c5-d6e7-8901-f012-3456789001ab
 
 	measure 'Gross Profit' = [Total Sales] - [Total COGS]
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 02_Profitability
 		lineageTag: a3b4c5d6-e7f8-9012-abcd-ef34567890bc
 
 	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Total Sales], BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 02_Profitability
 		lineageTag: b3c4d5e6-f7a8-9012-bcde-f034567890cd
 
 	measure 'Total Stock Units' = SUM(FactInventory[Units])
-		formatString: "#,##0"
+		formatString: #,##0
 		displayFolder: 03_Supply & Inventory
 		lineageTag: c3d4e5f6-a7b8-9012-cdef-1034567890de
 
-	measure 'Avg Daily Sales (30d)' = 
+	measure 'Avg Daily Sales (30d)' =
 			CALCULATE(
 			    DIVIDE([Total Quantity Sold], 30),
 			    DATESINPERIOD(DimDate[Date], LASTDATE(DimDate[Date]), -30, DAY)
 			)
-		formatString: "#,##0.0"
+		formatString: #,##0.0
 		displayFolder: 03_Supply & Inventory
 		lineageTag: d3e4f5a6-b7c8-9012-def0-2034567890ef
 
 	measure 'Days of Inventory Cover' = DIVIDE([Total Stock Units], [Avg Daily Sales (30d)], BLANK())
-		formatString: "#,##0.0 ""days"""
+		formatString: #,##0.0 "days"
 		displayFolder: 03_Supply & Inventory
 		lineageTag: e3f4a5b6-c7d8-9012-ef01-3034567890f0
 
 	measure 'Total Orders' = DISTINCTCOUNT(FactOrderFulfillment[OrderID])
-		formatString: "#,##0"
+		formatString: #,##0
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: f3a4b5c6-d7e8-9012-f012-4034567890a1
 
-	measure 'On-Time Deliveries' = 
+	measure 'On-Time Deliveries' =
 			CALCULATE(
 			    [Total Orders],
 			    FILTER(
@@ -101,16 +101,16 @@ table KeyMeasures
 			        FactOrderFulfillment[DeliveryDate] <= FactOrderFulfillment[ShipDate] + 7
 			    )
 			)
-		formatString: "#,##0"
+		formatString: #,##0
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: a4b5c6d7-e8f9-0123-abcd-ef456789012b
 
 	measure 'OTIF %' = DIVIDE([On-Time Deliveries], [Total Orders], BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: b4c5d6e7-f8a9-0123-bcde-f0456789023c
 
-	measure 'Avg Lead Time (Days)' = 
+	measure 'Avg Lead Time (Days)' =
 			AVERAGEX(
 			    FactOrderFulfillment,
 			    DATEDIFF(
@@ -119,11 +119,11 @@ table KeyMeasures
 			        DAY
 			    )
 			)
-		formatString: "#,##0.0 ""days"""
+		formatString: #,##0.0 "days"
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: c4d5e6f7-a8b9-0123-cdef-10456789034d
 
-	measure 'Avg Ship-to-Delivery (Days)' = 
+	measure 'Avg Ship-to-Delivery (Days)' =
 			AVERAGEX(
 			    FactOrderFulfillment,
 			    DATEDIFF(
@@ -132,36 +132,36 @@ table KeyMeasures
 			        DAY
 			    )
 			)
-		formatString: "#,##0.0 ""days"""
+		formatString: #,##0.0 "days"
 		displayFolder: 04_Fulfillment & Logistics
 		lineageTag: d4e5f6a7-b8c9-0123-def0-20456789045e
 
-	measure 'Total Campaign Spend' = SUM(FactCampaignSpend[SpendAmount])
-		formatString: "$#,##0.00"
+	measure 'Total Campaign Spend' = SUM(FactCampaignSpend[Spend])
+		formatString: $#,##0.00
 		displayFolder: 05_Marketing & Campaigns
 		lineageTag: e4f5a6b7-c8d9-0123-ef01-30456789056f
 
 	measure 'Marketing ROI' = DIVIDE([Total Sales], [Total Campaign Spend], BLANK())
-		formatString: "#,##0.00""x"""
+		formatString: #,##0.00"x"
 		displayFolder: 05_Marketing & Campaigns
 		lineageTag: f4a5b6c7-d8e9-0123-f012-40456789067a
 
 	measure 'Revenue per Campaign \$' = DIVIDE([Total Sales], DISTINCTCOUNT(FactCampaignSpend[CampaignKey]), BLANK())
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 05_Marketing & Campaigns
 		lineageTag: a5b6c7d8-e9f0-1234-abcd-ef567890178b
 
 	measure 'Total Customers' = DISTINCTCOUNT(FactSales[CustomerID])
-		formatString: "#,##0"
+		formatString: #,##0
 		displayFolder: 06_Customer Analytics
 		lineageTag: b5c6d7e8-f0a1-1234-bcde-f0567890289c
 
 	measure 'Sales per Customer' = DIVIDE([Total Sales], [Total Customers], BLANK())
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 06_Customer Analytics
 		lineageTag: c5d6e7f8-a0b1-1234-cdef-106789039ad
 
-	measure 'Repeat Customer Rate %' = 
+	measure 'Repeat Customer Rate %' =
 			VAR _RepeatCustomers =
 			    COUNTROWS(
 			        FILTER(
@@ -174,16 +174,16 @@ table KeyMeasures
 			    )
 			RETURN
 			    DIVIDE(_RepeatCustomers, [Total Customers], BLANK())
-		formatString: "0.0%;(0.0%);""-"""
+		formatString: 0.0%;(0.0%);"-"
 		displayFolder: 06_Customer Analytics
 		lineageTag: d5e6f7a8-b0c1-1234-def0-2067890ab0be
 
 	measure 'Selected Period Sales' = CALCULATE([Total Sales], ALLSELECTED(DimDate))
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 07_Dynamic & Context
 		lineageTag: e5f6a7b8-c0d1-1234-ef01-3067890bc0cf
 
-	measure 'Running Total Sales' = 
+	measure 'Running Total Sales' =
 			CALCULATE(
 			    [Total Sales],
 			    FILTER(
@@ -191,22 +191,30 @@ table KeyMeasures
 			        DimDate[Date] <= MAX(DimDate[Date])
 			    )
 			)
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 07_Dynamic & Context
 		lineageTag: f5a6b7c8-d0e1-1234-f012-4067890cd0d0
 
-	measure 'Sales Rolling 3M' = 
+	measure 'Sales Rolling 3M' =
 			CALCULATE(
 			    [Total Sales],
 			    DATESINPERIOD(DimDate[Date], LASTDATE(DimDate[Date]), -3, MONTH)
 			)
-		formatString: "$#,##0.00"
+		formatString: $#,##0.00
 		displayFolder: 07_Dynamic & Context
 		lineageTag: a6b7c8d9-e0f1-2345-abcd-ef678901e0e1
+
+	column Value
+		isHidden
+		lineageTag: cabf892f-0e48-4e97-86a5-bbc4fc7ec7d1
+		isNameInferred
+		sourceColumn: [Value]
 
 	partition KeyMeasures = calculated
 		mode: import
 		source = {(BLANK())}
 
 	annotation PBI_ResultType = Table
+
 	annotation PBI_NavigationStepName = Navigation
+

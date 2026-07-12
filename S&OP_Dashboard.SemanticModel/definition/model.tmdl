@@ -43,9 +43,9 @@ ref table Security
 ref table DimDate
 ref table KeyMeasures
 
-ref cultureInfo en-US
-
 ref role 'Regional Sales Rep'
-ref role 'Executive'
-ref role 'Admin'
+ref role Executive
+ref role Admin
+
+ref cultureInfo en-US
 

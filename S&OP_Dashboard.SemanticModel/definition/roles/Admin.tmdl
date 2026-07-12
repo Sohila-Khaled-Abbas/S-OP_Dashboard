@@ -1,0 +1,5 @@
+role Admin
+	modelPermission: readRefresh
+
+	annotation PBI_Id = 4ce4c1b260cd4073b86260643f8de2c4
+

@@ -82,19 +82,19 @@ table FactOrderFulfillment
 				    #"Merged Queries Customer" = Table.NestedJoin(#"Removed Other Columns", {"CustomerName"}, Table.Buffer(DimCustomer), {"CustomerName"}, "DimCustomer", JoinKind.LeftOuter),
 				    #"Expanded DimCustomer" = Table.ExpandTableColumn(#"Merged Queries Customer", "DimCustomer", {"CustomerID"}, {"CustomerID"}),
 				    #"Removed CustomerName" = Table.RemoveColumns(#"Expanded DimCustomer",{"CustomerName"}),
-				    
+				
 				    // Aggregate Shipments to enforce 1:1 grain per OrderID and buffer in RAM
 				    #"Grouped Shipments" = Table.Group(shipments, {"OrderID"}, {{"ShipDate", each List.Max([ShipDate]), type nullable date}, {"DeliveryDate", each List.Max([DeliveryDate]), type nullable date}}),
 				    #"Buffered Shipments" = Table.Buffer(#"Grouped Shipments"),
 				    #"Merged Shipments" = Table.NestedJoin(#"Removed CustomerName", {"OrderID"}, #"Buffered Shipments", {"OrderID"}, "ShipmentData", JoinKind.LeftOuter),
 				    #"Expanded Shipments" = Table.ExpandTableColumn(#"Merged Shipments", "ShipmentData", {"ShipDate", "DeliveryDate"}, {"ShipDate", "DeliveryDate"}),
-				    
+				
 				    // Join Payments to Invoices, aggregate financial dates by OrderID, and buffer in RAM
 				    #"Invoices with Payments" = Table.NestedJoin(INVOICES, {"InvoiceID"}, payments, {"InvoiceID"}, "PaymentDetails", JoinKind.LeftOuter),
 				    #"Expanded Payments" = Table.ExpandTableColumn(#"Invoices with Payments", "PaymentDetails", {"PayDate"}, {"PayDate"}),
 				    #"Grouped Invoices" = Table.Group(#"Expanded Payments", {"OrderID"}, {{"InvoiceDate", each List.Max([InvoiceDate]), type nullable date}, {"PayDate", each List.Max([PayDate]), type nullable date}}),
 				    #"Buffered Invoices" = Table.Buffer(#"Grouped Invoices"),
-				    
+				
 				    // Join aggregated financial dates back to fulfillment table
 				    #"Merged Invoices" = Table.NestedJoin(#"Expanded Shipments", {"OrderID"}, #"Buffered Invoices", {"OrderID"}, "InvoiceData", JoinKind.LeftOuter),
 				    #"Expanded InvoiceData" = Table.ExpandTableColumn(#"Merged Invoices", "InvoiceData", {"InvoiceDate", "PayDate"}, {"InvoiceDate", "PayDate"})

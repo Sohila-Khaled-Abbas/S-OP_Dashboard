@@ -5,8 +5,5 @@ role 'Regional Sales Rep'
 
 	tablePermission DimGeo = [Region] = LOOKUPVALUE(Security[Region], Security[UserEmail], USERPRINCIPALNAME())
 
-role 'Executive'
-	modelPermission: read
+	annotation PBI_Id = 2818dbba4fcd47d494b7a96c223985cc
 
-role 'Admin'
-	modelPermission: readRefresh
