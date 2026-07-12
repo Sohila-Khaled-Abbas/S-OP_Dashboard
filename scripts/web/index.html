@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power BI MCP Dashboard</title>
+  <meta name="description" content="Local web interface for Power BI Modeling MCP Server with Ollama AI integration">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <h1>Power BI MCP Dashboard</h1>
+    </div>
+    <div class="topbar-status">
+      <div class="status-pill" id="mcp-status">
+        <span class="status-dot" id="mcp-dot"></span>
+        <span id="mcp-status-text">MCP Disconnected</span>
+      </div>
+      <div class="status-pill" id="pbi-status">
+        <span class="status-dot" id="pbi-dot"></span>
+        <span id="pbi-status-text">No PBI Instance</span>
+      </div>
+      <button class="btn btn-primary" id="btn-connect" onclick="autoConnect()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Connect
+      </button>
+      <button class="btn btn-danger" id="btn-disconnect" onclick="doDisconnect()" style="display:none;">
+        Disconnect
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ SIDEBAR: Model Explorer ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>📊 Model Explorer</h2>
+      <button class="btn btn-sm" onclick="refreshModel()" title="Refresh model">🔄</button>
+    </div>
+    <div class="sidebar-content" id="model-tree">
+      <div class="results-empty" style="height:200px;">
+        <p>Connect to Power BI to explore model</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="main">
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="dax" onclick="switchTab('dax')">⚡ DAX Query</div>
+      <div class="tab" data-tab="measures" onclick="switchTab('measures')">📐 Measures</div>
+      <div class="tab" data-tab="relationships" onclick="switchTab('relationships')">🔗 Relationships</div>
+    </div>
+
+    <div class="tab-panels">
+      <!-- DAX Query Panel -->
+      <div class="tab-panel active" id="panel-dax">
+        <div class="editor-area">
+          <div class="editor-toolbar">
+            <div class="editor-toolbar-left">
+              <span style="color:var(--text-muted);font-size:0.78rem;">DAX Query Editor</span>
+            </div>
+            <div class="editor-toolbar-right">
+              <label style="font-size:0.75rem;color:var(--text-muted);">Max Rows:</label>
+              <input type="number" id="max-rows" value="100" min="1" max="10000" class="form-input" style="width:80px;padding:4px 8px;">
+              <button class="btn btn-primary" onclick="executeDax()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Execute
+              </button>
+              <button class="btn btn-sm" onclick="clearDax()">Clear</button>
+            </div>
+          </div>
+          <textarea class="dax-editor" id="dax-input" placeholder="EVALUATE&#10;TOPN(10, FactSales, FactSales[TotalAmount], DESC)" spellcheck="false"></textarea>
+          <div class="results-area" id="dax-results">
+            <div class="results-empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+              <p>Execute a DAX query to see results</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Measures Panel -->
+      <div class="tab-panel" id="panel-measures">
+        <div class="measure-form" id="measure-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Measure Name</label>
+              <input type="text" id="m-name" class="form-input" placeholder="Total Revenue">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Table</label>
+              <select id="m-table" class="form-input"><option value="">Select table...</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">DAX Expression</label>
+            <textarea id="m-expr" class="form-textarea" placeholder="SUM(FactSales[TotalAmount])"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Format String</label>
+              <input type="text" id="m-format" class="form-input" placeholder='#,##0.00'>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Folder</label>
+              <input type="text" id="m-folder" class="form-input" placeholder="KPIs">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveMeasure()">💾 Save Measure</button>
+        </div>
+        <div class="measures-list" id="measures-list">
+          <div class="results-empty" style="height:200px;">
+            <p>Connect to load measures</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relationships Panel -->
+      <div class="tab-panel" id="panel-relationships">
+        <div class="results-area" id="rel-results" style="padding:16px;">
+          <div class="results-empty" style="height:200px;">
+            <p>Connect to load relationships</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ CHAT PANEL ============ -->
+  <aside class="chat-panel">
+    <div class="chat-header">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Assistant
+      </h2>
+      <button class="btn btn-sm" onclick="clearChat()">Clear</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg system">Powered by Ollama · Ask about your semantic model</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask about your model..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn btn-primary" onclick="sendChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </aside>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ========================================================================
+// STATE
+// ========================================================================
+const API = '';
+let chatHistory = [];
+let allTables = [];
+let allMeasures = [];
+
+// ========================================================================
+// TOAST NOTIFICATIONS
+// ========================================================================
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+}
+
+// ========================================================================
+// TAB SWITCHING
+// ========================================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+}
+
+// ========================================================================
+// API CALLS
+// ========================================================================
+async function apiCall(url, opts = {}) {
+  try {
+    const resp = await fetch(API + url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opts,
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+      throw new Error(err.detail || 'API error');
+    }
+    return await resp.json();
+  } catch (e) {
+    toast(e.message, 'error');
+    throw e;
+  }
+}
+
+// ========================================================================
+// CONNECTION
+// ========================================================================
+async function autoConnect() {
+  const btn = document.getElementById('btn-connect');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Connecting...';
+
+  try {
+    // Check status first
+    const status = await apiCall('/api/status');
+    if (status.mcp_running) {
+      document.getElementById('mcp-dot').classList.add('active');
+      document.getElementById('mcp-status-text').textContent = `MCP Running (${status.tools_count} tools)`;
+    }
+
+    // List instances
+    const instances = await apiCall('/api/instances');
+    const data = instances.data || [];
+    if (data.length === 0) {
+      toast('No Power BI Desktop instances found. Please open your .pbip file.', 'error');
+      return;
+    }
+
+    // Connect to first instance
+    const result = await apiCall('/api/connect', {
+      method: 'POST',
+      body: JSON.stringify({ port: data[0].port }),
+    });
+
+    // Update UI
+    document.getElementById('pbi-dot').classList.add('active');
+    document.getElementById('pbi-status-text').textContent = data[0].parentWindowTitle || 'Connected';
+    document.getElementById('btn-connect').style.display = 'none';
+    document.getElementById('btn-disconnect').style.display = '';
+
+    toast('Connected to Power BI Desktop!', 'success');
+    await refreshModel();
+  } catch (e) {
+    // handled by apiCall
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Connect';
+  }
+}
+
+async function doDisconnect() {
+  try {
+    await apiCall('/api/disconnect', { method: 'POST' });
+    document.getElementById('pbi-dot').classList.remove('active');
+    document.getElementById('pbi-status-text').textContent = 'Disconnected';
+    document.getElementById('btn-connect').style.display = '';
+    document.getElementById('btn-disconnect').style.display = 'none';
+    document.getElementById('model-tree').innerHTML = '<div class="results-empty" style="height:200px;"><p>Connect to Power BI to explore model</p></div>';
+    toast('Disconnected', 'info');
+  } catch (e) { /* handled */ }
+}
+
+// ========================================================================
+// MODEL EXPLORER
+// ========================================================================
+async function refreshModel() {
+  try {
+    const [tablesResp, measuresResp] = await Promise.all([
+      apiCall('/api/tables'),
+      apiCall('/api/measures'),
+    ]);
+
+    allTables = tablesResp.data || [];
+    allMeasures = measuresResp.data || [];
+
+    renderModelTree();
+    renderMeasuresList();
+    populateTableDropdown();
+  } catch (e) { /* handled */ }
+}
+
+function renderModelTree() {
+  const container = document.getElementById('model-tree');
+  if (!allTables.length) {
+    container.innerHTML = '<div class="results-empty" style="height:200px;"><p>No tables found</p></div>';
+    return;
+  }
+
+  let html = '';
+  for (const table of allTables) {
+    const name = table.name || table.tableName || 'Unknown';
+    const columns = table.columns || [];
+    const measures = (allMeasures || []).filter(m => (m.tableName || '') === name);
+    const totalItems = columns.length + measures.length;
+
+    html += `<div class="tree-item">`;
+    html += `<div class="tree-header" onclick="this.parentElement.classList.toggle('open')">`;
+    html += `<span class="tree-chevron">▶</span>`;
+    html += `<span class="tree-icon">📋</span>`;
+    html += `<span class="tree-label">${esc(name)}</span>`;
+    html += `<span class="tree-badge">${totalItems}</span>`;
+    html += `</div>`;
+    html += `<div class="tree-children">`;
+
+    // Measures first
+    for (const m of measures) {
+      html += `<div class="tree-leaf" onclick="fillMeasure('${esc(m.name)}','${esc(name)}')">`;
+      html += `<span class="leaf-type type-measure">fx</span>`;
+      html += `<span>${esc(m.name)}</span>`;
+      html += `</div>`;
+    }
+
+    // Then columns
+    for (const col of columns) {
+      const colName = col.name || col.columnName || '';
+      const dtype = col.dataType || col.type || '';
+      const typeClass = getTypeClass(dtype);
+      html += `<div class="tree-leaf">`;
+      html += `<span class="leaf-type ${typeClass}">${esc(dtype.substring(0, 3).toUpperCase() || '...')}</span>`;
+      html += `<span>${esc(colName)}</span>`;
+      html += `</div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function getTypeClass(dt) {
+  const d = (dt || '').toLowerCase();
+  if (d.includes('string') || d.includes('text')) return 'type-string';
+  if (d.includes('int') || d.includes('double') || d.includes('decimal') || d.includes('currency') || d.includes('number')) return 'type-number';
+  if (d.includes('date') || d.includes('time')) return 'type-date';
+  if (d.includes('bool')) return 'type-bool';
+  return 'type-other';
+}
+
+function fillMeasure(name, table) {
+  const m = allMeasures.find(x => x.name === name && (x.tableName || '') === table);
+  if (m) {
+    document.getElementById('m-name').value = m.name || '';
+    document.getElementById('m-table').value = m.tableName || '';
+    document.getElementById('m-expr').value = m.expression || '';
+    document.getElementById('m-format').value = m.formatString || '';
+    document.getElementById('m-folder').value = m.displayFolder || '';
+    switchTab('measures');
+  }
+}
+
+function populateTableDropdown() {
+  const sel = document.getElementById('m-table');
+  sel.innerHTML = '<option value="">Select table...</option>';
+  for (const t of allTables) {
+    const name = t.name || t.tableName || '';
+    sel.innerHTML += `<option value="${esc(name)}">${esc(name)}</option>`;
+  }
+}
+
+// ========================================================================
+// DAX EXECUTION
+// ========================================================================
+async function executeDax() {
+  const query = document.getElementById('dax-input').value.trim();
+  if (!query) { toast('Enter a DAX query first', 'error'); return; }
+
+  const maxRows = parseInt(document.getElementById('max-rows').value) || 100;
+  const results = document.getElementById('dax-results');
+  results.innerHTML = '<div class="results-empty"><div class="spinner"></div><p>Executing...</p></div>';
+
+  try {
+    const resp = await apiCall('/api/dax', {
+      method: 'POST',
+      body: JSON.stringify({ query, maxRows }),
+    });
+    renderDaxResults(resp);
+  } catch (e) {
+    results.innerHTML = `<div class="results-empty"><p style="color:var(--accent-red);">Error: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function renderDaxResults(resp) {
+  const container = document.getElementById('dax-results');
+  const data = resp.data || resp.results || resp.raw;
+
+  if (typeof data === 'string') {
+    container.innerHTML = `<pre style="padding:16px;font-family:var(--font-mono);font-size:0.82rem;white-space:pre-wrap;">${esc(data)}</pre>`;
+    return;
+  }
+
+  // Parse tabular results
+  let rows = [];
+  if (Array.isArray(data)) {
+    rows = data;
+  } else if (data && data.rows) {
+    rows = data.rows;
+  }
+
+  if (!rows.length) {
+    container.innerHTML = '<div class="results-empty"><p>Query returned no rows</p></div>';
+    return;
+  }
+
+  const cols = Object.keys(rows[0]);
+  let html = '<table class="results-table"><thead><tr>';
+  for (const col of cols) html += `<th>${esc(col)}</th>`;
+  html += '</tr></thead><tbody>';
+
+  for (const row of rows) {
+    html += '<tr>';
+    for (const col of cols) {
+      const val = row[col];
+      html += `<td>${val === null || val === undefined ? '<span style="color:var(--text-muted)">null</span>' : esc(String(val))}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  html += `<div class="results-info"><span>${rows.length} rows returned</span><span>${cols.length} columns</span></div>`;
+
+  container.innerHTML = html;
+}
+
+function clearDax() {
+  document.getElementById('dax-input').value = '';
+  document.getElementById('dax-results').innerHTML = '<div class="results-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><p>Execute a DAX query to see results</p></div>';
+}
+
+// ========================================================================
+// MEASURES
+// ========================================================================
+function renderMeasuresList() {
+  const container = document.getElementById('measures-list');
+  if (!allMeasures.length) {
+    container.innerHTML = '<div class="results-empty" style="height:200px;"><p>No measures found</p></div>';
+    return;
+  }
+
+  let html = '';
+  for (const m of allMeasures) {
+    html += `<div class="measure-card" onclick="fillMeasure('${esc(m.name)}','${esc(m.tableName || '')}')">`;
+    html += `<div class="measure-card-header">`;
+    html += `<span class="measure-name">${esc(m.name)}</span>`;
+    html += `<span class="measure-table">${esc(m.tableName || '')}</span>`;
+    html += `</div>`;
+    html += `<div class="measure-expr">${esc(m.expression || '')}</div>`;
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+async function saveMeasure() {
+  const name = document.getElementById('m-name').value.trim();
+  const expr = document.getElementById('m-expr').value.trim();
+  if (!name || !expr) { toast('Name and expression are required', 'error'); return; }
+
+  try {
+    await apiCall('/api/measure', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        expression: expr,
+        tableName: document.getElementById('m-table').value || null,
+        formatString: document.getElementById('m-format').value || null,
+        displayFolder: document.getElementById('m-folder').value || null,
+      }),
+    });
+    toast(`Measure "${name}" saved!`, 'success');
+    await refreshModel();
+  } catch (e) { /* handled */ }
+}
+
+// ========================================================================
+// RELATIONSHIPS
+// ========================================================================
+async function loadRelationships() {
+  const container = document.getElementById('rel-results');
+  try {
+    const resp = await apiCall('/api/relationships');
+    const rels = resp.data || [];
+    if (!rels.length) {
+      container.innerHTML = '<div class="results-empty"><p>No relationships found</p></div>';
+      return;
+    }
+
+    let html = '<table class="results-table"><thead><tr><th>From</th><th>→</th><th>To</th><th>Cardinality</th><th>Active</th></tr></thead><tbody>';
+    for (const r of rels) {
+      const from = `${r.fromTable || ''}[${r.fromColumn || ''}]`;
+      const to = `${r.toTable || ''}[${r.toColumn || ''}]`;
+      html += `<tr>`;
+      html += `<td>${esc(from)}</td>`;
+      html += `<td style="color:var(--accent-blue)">→</td>`;
+      html += `<td>${esc(to)}</td>`;
+      html += `<td>${esc(r.cardinality || r.crossFilteringBehavior || '')}</td>`;
+      html += `<td>${r.isActive !== false ? '✅' : '❌'}</td>`;
+      html += `</tr>`;
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (e) { /* handled */ }
+}
+
+// ========================================================================
+// CHAT
+// ========================================================================
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  appendChatMsg(msg, 'user');
+
+  // Show typing indicator
+  const typingId = appendChatMsg('Thinking...', 'system');
+
+  try {
+    const resp = await apiCall('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: msg, history: chatHistory }),
+    });
+
+    // Remove typing indicator
+    document.getElementById(typingId)?.remove();
+
+    const reply = resp.response || 'No response';
+    appendChatMsg(reply, 'assistant');
+    chatHistory = resp.history || [];
+  } catch (e) {
+    document.getElementById(typingId)?.remove();
+    appendChatMsg(`Error: ${e.message}`, 'system');
+  }
+}
+
+function appendChatMsg(text, role) {
+  const container = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  const id = 'msg-' + Date.now() + Math.random().toString(36).slice(2, 6);
+  el.id = id;
+  el.className = `chat-msg ${role}`;
+
+  if (role === 'assistant') {
+    el.innerHTML = formatMarkdown(text);
+  } else {
+    el.textContent = text;
+  }
+
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '<div class="chat-msg system">Chat cleared. Ask a new question!</div>';
+}
+
+// ========================================================================
+// UTILITIES
+// ========================================================================
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function formatMarkdown(text) {
+  // Basic markdown: code blocks, inline code, bold, italic
+  let html = esc(text);
+  // Code blocks
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Bold
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  // Line breaks
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+// ========================================================================
+// INIT
+// ========================================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  // Check initial status
+  try {
+    const status = await apiCall('/api/status');
+    if (status.mcp_running) {
+      document.getElementById('mcp-dot').classList.add('active');
+      document.getElementById('mcp-status-text').textContent = `MCP Ready (${status.tools_count} tools)`;
+    }
+    if (status.connected) {
+      document.getElementById('pbi-dot').classList.add('active');
+      document.getElementById('pbi-status-text').textContent = status.connection_name || 'Connected';
+      document.getElementById('btn-connect').style.display = 'none';
+      document.getElementById('btn-disconnect').style.display = '';
+      await refreshModel();
+    }
+  } catch (e) {
+    // Server probably not started yet
+    document.getElementById('mcp-status-text').textContent = 'Server offline';
+  }
+
+  // Load relationships when tab is clicked
+  document.querySelector('[data-tab="relationships"]').addEventListener('click', loadRelationships);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Ctrl+Enter to execute DAX
+  if (e.ctrlKey && e.key === 'Enter') {
+    const activePanel = document.querySelector('.tab-panel.active');
+    if (activePanel?.id === 'panel-dax') {
+      e.preventDefault();
+      executeDax();
+    }
+  }
+});
+</script>
+</body>
+</html>
