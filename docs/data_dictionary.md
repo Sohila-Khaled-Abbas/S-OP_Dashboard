@@ -17,7 +17,7 @@
 - **[FactPromotionCoverage](#factpromotioncoverage)** (Fact) — 2 Columns, 0 Measures
 - **[FactSales](#factsales)** (Fact) — 13 Columns, 0 Measures
 - **[FactSalesTargets](#factsalestargets)** (Fact) — 2 Columns, 0 Measures
-- **[KeyMeasures](#keymeasures)** (Fact) — 0 Columns, 30 Measures
+- **[KeyMeasures](#keymeasures)** (Fact) — 1 Columns, 29 Measures
 - **[Security](#security)** (Fact) — 2 Columns, 0 Measures
 
 ---
@@ -236,14 +236,15 @@
 ### Columns
 | Column Name | Data Type | Source Field | Summarize By | Description |
 | :--- | :--- | :--- | :--- | :--- |
+| **`Value`** | `unknown` | `[Value]` | `` | - |
 
 ### Measures
 | Measure Name | DAX Expression | Description |
 | :--- | :--- | :--- |
-| **`'Total Sales'`** | `SUM(FactSales[LineTotal]) formatString: "$#,##0.00" displ...` | - |
-| **`'Total Quantity Sold'`** | `SUM(FactSales[Quantity]) formatString: "#,##0" displayFol...` | - |
-| **`'Sales Target'`** | `SUM(FactSalesTargets[TargetAmount]) formatString: "$#,##0...` | - |
-| **`'Sales Variance'`** | `[Total Sales] - [Sales Target] formatString: "$#,##0.00;(...` | - |
+| **`'Total Sales'`** | `SUM(FactSales[LineTotal]) formatString: $#,##0.00 display...` | - |
+| **`'Total Quantity Sold'`** | `SUM(FactSales[Quantity]) formatString: #,##0 displayFolde...` | - |
+| **`'Sales Target'`** | `SUM(FactSalesTargets[TargetRevenue]) formatString: $#,##0...` | - |
+| **`'Sales Variance'`** | `[Total Sales] - [Sales Target] formatString: $#,##0.00;($...` | - |
 | **`'Sales Variance`** | `DIVIDE([Sales Variance], [Sales Target], BLANK()) formatS...` | - |
 | **`'Sales YTD'`** | `CALCULATE([Total Sales], DATESYTD(DimDate[Date])) formatS...` | - |
 | **`'Sales PYTD'`** | `CALCULATE([Total Sales], DATESYTD(SAMEPERIODLASTYEAR(DimD...` | - |
@@ -251,9 +252,9 @@
 | **`'Sales MoM Growth`** | `VAR _CurrentMonth = [Total Sales] VAR _PreviousMonth = CA...` | - |
 | **`'Avg Order Value'`** | `DIVIDE([Total Sales], DISTINCTCOUNT(FactSales[OrderID]), ...` | - |
 | **`'Total COGS'`** | `SUMX(FactSales, FactSales[Quantity] * FactSales[UnitCost]...` | - |
-| **`'Gross Profit'`** | `[Total Sales] - [Total COGS] formatString: "$#,##0.00" di...` | - |
+| **`'Gross Profit'`** | `[Total Sales] - [Total COGS] formatString: $#,##0.00 disp...` | - |
 | **`'Gross Margin`** | `DIVIDE([Gross Profit], [Total Sales], BLANK()) formatStri...` | - |
-| **`'Total Stock Units'`** | `SUM(FactInventory[Units]) formatString: "#,##0" displayFo...` | - |
+| **`'Total Stock Units'`** | `SUM(FactInventory[Units]) formatString: #,##0 displayFold...` | - |
 | **`'Avg Daily Sales`** | `CALCULATE( DIVIDE([Total Quantity Sold], 30), DATESINPERI...` | - |
 | **`'Days of Inventory Cover'`** | `DIVIDE([Total Stock Units], [Avg Daily Sales (30d)], BLAN...` | - |
 | **`'Total Orders'`** | `DISTINCTCOUNT(FactOrderFulfillment[OrderID]) formatString...` | - |
@@ -261,15 +262,14 @@
 | **`'OTIF`** | `DIVIDE([On-Time Deliveries], [Total Orders], BLANK()) for...` | - |
 | **`'Avg Lead Time`** | `AVERAGEX( FactOrderFulfillment, DATEDIFF( FactOrderFulfil...` | - |
 | **`'Avg Ship-to-Delivery`** | `AVERAGEX( FactOrderFulfillment, DATEDIFF( FactOrderFulfil...` | - |
-| **`'Total Campaign Spend'`** | `SUM(FactCampaignSpend[SpendAmount]) formatString: "$#,##0...` | - |
+| **`'Total Campaign Spend'`** | `SUM(FactCampaignSpend[Spend]) formatString: $#,##0.00 dis...` | - |
 | **`'Marketing ROI'`** | `DIVIDE([Total Sales], [Total Campaign Spend], BLANK()) fo...` | - |
 | **`'Revenue per Campaign`** | `DIVIDE([Total Sales], DISTINCTCOUNT(FactCampaignSpend[Cam...` | - |
-| **`'Total Customers'`** | `DISTINCTCOUNT(FactSales[CustomerID]) formatString: "#,##0...` | - |
+| **`'Total Customers'`** | `DISTINCTCOUNT(FactSales[CustomerID]) formatString: #,##0 ...` | - |
 | **`'Sales per Customer'`** | `DIVIDE([Total Sales], [Total Customers], BLANK()) formatS...` | - |
 | **`'Repeat Customer Rate`** | `VAR _RepeatCustomers = COUNTROWS( FILTER( ADDCOLUMNS( VAL...` | - |
 | **`'Selected Period Sales'`** | `CALCULATE([Total Sales], ALLSELECTED(DimDate)) formatStri...` | - |
 | **`'Running Total Sales'`** | `CALCULATE( [Total Sales], FILTER( ALL(DimDate[Date]), Dim...` | - |
-| **`'Sales Rolling 3M'`** | `CALCULATE( [Total Sales], DATESINPERIOD(DimDate[Date], LA...` | - |
 
 ---
 
