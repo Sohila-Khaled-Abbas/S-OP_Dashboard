@@ -16,24 +16,22 @@
   "textClasses": {
     "callout": {
       "fontSize": 24,
-      "fontFace": "Inter, Segoe UI",
+      "fontFace": "Segoe UI",
       "color": "#1E3A8A"
     },
     "title": {
       "fontSize": 12,
-      "fontFace": "Inter, Segoe UI",
-      "color": "#111827",
-      "fontWeight": "Bold"
+      "fontFace": "Segoe UI Semibold",
+      "color": "#111827"
     },
     "header": {
       "fontSize": 10,
-      "fontFace": "Inter, Segoe UI",
-      "color": "#374151",
-      "fontWeight": "SemiBold"
+      "fontFace": "Segoe UI Semibold",
+      "color": "#374151"
     },
     "body": {
       "fontSize": 9,
-      "fontFace": "Inter, Segoe UI",
+      "fontFace": "Segoe UI",
       "color": "#4B5563"
     }
   },
