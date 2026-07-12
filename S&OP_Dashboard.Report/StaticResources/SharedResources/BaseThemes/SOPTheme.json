@@ -41,21 +41,33 @@
         "background": [
           {
             "show": true,
-            "color": { "solid": { "color": "#FFFFFF" } },
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
             "transparency": 0
           }
         ],
         "border": [
           {
             "show": true,
-            "color": { "solid": { "color": "#E5E7EB" } },
+            "color": {
+              "solid": {
+                "color": "#E5E7EB"
+              }
+            },
             "radius": 8
           }
         ],
         "dropShadow": [
           {
             "show": true,
-            "color": { "solid": { "color": "#000000" } },
+            "color": {
+              "solid": {
+                "color": "#000000"
+              }
+            },
             "position": "Outer",
             "preset": "Custom",
             "angle": 90,
@@ -67,8 +79,16 @@
         "visualHeader": [
           {
             "show": true,
-            "background": { "solid": { "color": "#FFFFFF" } },
-            "foreground": { "solid": { "color": "#64748B" } }
+            "background": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "foreground": {
+              "solid": {
+                "color": "#64748B"
+              }
+            }
           }
         ]
       }
@@ -78,7 +98,11 @@
     "*": {
       "background": [
         {
-          "color": { "solid": { "color": "#F9FAFB" } },
+          "color": {
+            "solid": {
+              "color": "#F9FAFB"
+            }
+          },
           "transparency": 0
         }
       ]
