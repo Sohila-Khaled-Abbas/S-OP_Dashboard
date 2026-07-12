@@ -204,6 +204,220 @@ table KeyMeasures
 		displayFolder: 07_Dynamic & Context
 		lineageTag: a6b7c8d9-e0f1-2345-abcd-ef678901e0e1
 
+	measure System_Metadata_HTML =
+			
+			VAR LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "MMMM DD, YYYY hh:mm AM/PM")
+			VAR ActiveCampaigns = CALCULATE(COUNTROWS('DimCampaign'))
+			VAR TotalStock = FORMAT([Total Stock Units], "#,##0")
+			
+			RETURN
+			"<div style='font-family: Segoe UI, sans-serif; padding: 15px; background-color: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; box-shadow: 2px 2px 4px rgba(0,0,0,0.05);'>
+			    <h3 style='color: #1E3A8A; margin-top: 0; font-size: 16px; font-weight: 600;'>System & Data Status</h3>
+			    <hr style='border: none; border-top: 1px solid #E5E7EB; margin-bottom: 10px;' />
+			    <table style='width: 100%; font-size: 13px; color: #64748B; border-collapse: collapse;'>
+			        <tr>
+			            <td style='padding: 4px 0;'><strong>Last Data Refresh:</strong></td>
+			            <td style='text-align: right;'>" & LastRefreshDate & "</td>
+			        </tr>
+			        <tr>
+			            <td style='padding: 4px 0;'><strong>Active Marketing Campaigns:</strong></td>
+			            <td style='text-align: right;'>" & ActiveCampaigns & "</td>
+			        </tr>
+			        <tr>
+			            <td style='padding: 4px 0;'><strong>Monitored Stock Units:</strong></td>
+			            <td style='text-align: right;'>" & TotalStock & "</td>
+			        </tr>
+			    </table>
+			</div>"
+		displayFolder: 00_HTML & UI/UX
+		lineageTag: 46b23cd1-2143-4f3b-b047-089e6c96406a
+
+	measure UI_4K_LandingPage_Refined = ```
+			
+			VAR CurrentUserEmail = USERPRINCIPALNAME()
+			VAR DotPosition = SEARCH(".", CurrentUserEmail, 1, 0)
+			VAR UserFirstName = IF(DotPosition > 0 && DotPosition < SEARCH("@", CurrentUserEmail, 1, 0), UPPER(LEFT(CurrentUserEmail, 1)) & MID(CurrentUserEmail, 2, DotPosition - 2), "Sohila")
+			
+			VAR MetricOrders = FORMAT(COUNTROWS('FactSales'), "#,##0")
+			VAR MetricCampaigns = FORMAT(COUNTROWS('DimCampaign'), "#,##0")
+			VAR MetricStock = FORMAT(SUM('FactInventory'[Units]), "#,##0")
+			VAR RefreshDate = FORMAT(MAX('DimDate'[Date]), "MMMM DD, YYYY")
+			
+			RETURN
+			"<!DOCTYPE html>
+			<html style='height: 100%; width: 100%; margin: 0; padding: 0;'>
+			<head>
+			<style>
+			    /* Elegant Slide and Fade Animation */
+			    @keyframes fadeInUp {
+			        from { opacity: 0; transform: translateY(3vh); }
+			        to { opacity: 1; transform: translateY(0); }
+			    }
+			    
+			    @keyframes pulseGlow {
+			        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+			        70% { box-shadow: 0 0 0 2vh rgba(59, 130, 246, 0); }
+			        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+			    }
+			
+			    body {
+			        margin: 0;
+			        padding: 0;
+			        width: 100%;
+			        height: 100%;
+			        /* Theme Background: F9FAFB */
+			        background-color: #F9FAFB;
+			        /* Decorative background shapes using Theme Colors */
+			        background-image: 
+			            radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+			            radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+			        display: flex;
+			        align-items: center;
+			        justify-content: center;
+			        font-family: 'Segoe UI', sans-serif;
+			        overflow: hidden;
+			        box-sizing: border-box;
+			    }
+			
+			    /* Main Content Wrapper */
+			    .hero-container {
+			        text-align: center;
+			        width: 85%;
+			        max-width: 90vw;
+			        animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+			        z-index: 10;
+			        position: relative;
+			    }
+			
+			    /* Typography using Theme Text Classes */
+			    h1 { 
+			        /* Theme Text: title -> #111827 */
+			        color: #111827; 
+			        font-size: 4.5vw; 
+			        margin: 0 0 1vh 0; 
+			        font-weight: 300; 
+			        letter-spacing: -0.01em; 
+			    }
+			    
+			    h1 strong { 
+			        /* Theme Accent: #1E3A8A */
+			        color: #1E3A8A; 
+			        font-family: 'Segoe UI Semibold', sans-serif; 
+			    }
+			    
+			    .subtitle { 
+			        /* Theme Text: body -> #4B5563 */
+			        color: #4B5563; 
+			        font-size: 1.2vw; 
+			        margin-bottom: 6vh; 
+			        font-weight: 400; 
+			        max-width: 60%;
+			        margin-left: auto;
+			        margin-right: auto;
+			        line-height: 1.6;
+			    }
+			
+			    /* Asymmetric Data Metric Grid */
+			    .data-grid {
+			        display: grid;
+			        grid-template-columns: repeat(3, 1fr);
+			        gap: 2.5vw;
+			        margin-bottom: 7vh;
+			    }
+			
+			    /* Elegant Metric Cards matching Theme Visual Styles */
+			    .data-card {
+			        background-color: #FFFFFF;
+			        padding: 5vh 2vw;
+			        border-radius: 1.5vw;
+			        border: 1px solid #E5E7EB;
+			        /* Theme DropShadow */
+			        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+			        transition: all 0.4s ease;
+			        position: relative;
+			        overflow: hidden;
+			    }
+			
+			    /* Distinct top border for each card using Theme Palette */
+			    .data-card:nth-child(1) { border-top: 0.4vh solid #3B82F6; } /* Blue */
+			    .data-card:nth-child(2) { border-top: 0.4vh solid #7C3AED; } /* Purple */
+			    .data-card:nth-child(3) { border-top: 0.4vh solid #10B981; } /* Green */
+			
+			    .data-card:hover { 
+			        transform: translateY(-0.8vh); 
+			        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08); 
+			    }
+			    
+			    .data-value { 
+			        /* Theme Text: callout -> #1E3A8A */
+			        font-size: 3.8vw; 
+			        font-weight: 700; 
+			        color: #1E3A8A; 
+			        margin-bottom: 1vh; 
+			        font-family: 'Segoe UI Semibold', sans-serif;
+			    }
+			    
+			    .data-label { 
+			        /* Theme Text: header -> #374151 */
+			        font-size: 0.9vw; 
+			        color: #374151; 
+			        text-transform: uppercase; 
+			        letter-spacing: 0.15vw; 
+			        font-weight: 600;
+			    }
+			
+			    /* Refined CTA Button */
+			    .cta-visual {
+			        display: inline-block;
+			        /* Theme Primary: #3B82F6 */
+			        background-color: #3B82F6;
+			        color: #FFFFFF;
+			        font-size: 1.1vw;
+			        font-family: 'Segoe UI Semibold', sans-serif;
+			        padding: 2vh 5vw;
+			        border-radius: 5vw;
+			        letter-spacing: 0.05vw;
+			        animation: pulseGlow 3s infinite;
+			        cursor: pointer; /* Suggests interactivity */
+			    }
+			
+			    .footer { 
+			        margin-top: 5vh; 
+			        font-size: 0.8vw; 
+			        color: #64748B; 
+			    }
+			</style>
+			</head>
+			<body>
+			    <div class='hero-container'>
+			        <h1>Omnichannel <strong>S&OP Intelligence</strong></h1>
+			        <p class='subtitle'>Welcome back, " & UserFirstName & ". The data pipelines have successfully synchronized. Your enterprise logistics, inventory margins, and active campaign metrics are ready for review.</p>
+			        
+			        <div class='data-grid'>
+			            <div class='data-card'>
+			                <div class='data-value'>" & MetricOrders & "</div>
+			                <div class='data-label'>Processed Orders</div>
+			            </div>
+			            <div class='data-card'>
+			                <div class='data-value'>" & MetricCampaigns & "</div>
+			                <div class='data-label'>Active Campaigns</div>
+			            </div>
+			            <div class='data-card'>
+			                <div class='data-value'>" & MetricStock & "</div>
+			                <div class='data-label'>Stock Units (Qty)</div>
+			            </div>
+			        </div>
+			
+			        <div class='cta-visual'>Enter Executive Dashboard</div>
+			        
+			        <div class='footer'>Latest Synchronization: " & RefreshDate & " | Automated via DeepClean OS</div>
+			    </div>
+			</body>
+			</html>"
+			```
+		displayFolder: 00_HTML & UI/UX
+		lineageTag: c24854a0-be84-4227-82e7-62895f2f823e
+
 	column Value
 		isHidden
 		lineageTag: cabf892f-0e48-4e97-86a5-bbc4fc7ec7d1

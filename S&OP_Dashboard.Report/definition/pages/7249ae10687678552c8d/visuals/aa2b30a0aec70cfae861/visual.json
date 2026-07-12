@@ -1,0 +1,56 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
+  "name": "aa2b30a0aec70cfae861",
+  "position": {
+    "x": 10.678717302511515,
+    "y": 0,
+    "z": 0,
+    "height": 2162.4402537585815,
+    "width": 3828.3201529503781,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "htmlContent443BE3AD55E043BF878BED274D3A6855",
+    "query": {
+      "queryState": {
+        "content": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "KeyMeasures"
+                    }
+                  },
+                  "Property": "UI_4K_LandingPage_Refined"
+                }
+              },
+              "queryRef": "KeyMeasures.UI_Welcome_HTML",
+              "nativeQueryRef": "UI_4K_LandingPage_Refined"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "ee3992dabe17863b9383",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KeyMeasures"
+              }
+            },
+            "Property": "UI_4K_LandingPage_Refined"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}
