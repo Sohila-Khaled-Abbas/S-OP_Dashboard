@@ -370,7 +370,7 @@ table KeyMeasures
 			    }
 			
 			    .logo-text {
-			        font-size: clamp(20px, 1.8vw, 32px);
+			        font-size: 32px;
 			        font-weight: 700;
 			        letter-spacing: 0.8px;
 			        background: linear-gradient(to right, #FFFFFF, #E2E8F0);
@@ -383,10 +383,10 @@ table KeyMeasures
 			    }
 			
 			    .welcome-text h2 {
-			        font-size: clamp(36px, 2.8vw, 64px);
+			        font-size: 48px;
 			        font-weight: 300;
 			        margin: 0;
-			        line-height: 1.2;
+			        line-height: 1.25;
 			        color: #E2E8F0;
 			    }
 			
@@ -394,7 +394,7 @@ table KeyMeasures
 			        font-weight: 700;
 			        color: #60A5FA;
 			        display: block;
-			        font-size: clamp(42px, 3.5vw, 76px);
+			        font-size: 64px;
 			        margin-top: 10px;
 			        letter-spacing: -1px;
 			        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
@@ -403,7 +403,7 @@ table KeyMeasures
 			    }
 			
 			    .welcome-desc {
-			        font-size: clamp(14px, 1.1vw, 22px);
+			        font-size: 20px;
 			        color: #94A3B8;
 			        line-height: 1.8;
 			        margin-top: 30px;
@@ -418,7 +418,7 @@ table KeyMeasures
 			    }
 			
 			    .status-title {
-			        font-size: clamp(11px, 0.9vw, 16px);
+			        font-size: 16px;
 			        font-weight: 700;
 			        text-transform: uppercase;
 			        letter-spacing: 2px;
@@ -430,7 +430,7 @@ table KeyMeasures
 			        display: flex;
 			        justify-content: space-between;
 			        align-items: center;
-			        font-size: clamp(13px, 1vw, 18px);
+			        font-size: 18px;
 			        margin-bottom: 15px;
 			        color: #94A3B8;
 			    }
@@ -450,7 +450,7 @@ table KeyMeasures
 			    }
 			
 			    .header-area h1 {
-			        font-size: clamp(48px, 3.8vw, 84px);
+			        font-size: 64px;
 			        font-weight: 700;
 			        color: #FFFFFF;
 			        margin: 0;
@@ -461,7 +461,7 @@ table KeyMeasures
 			    }
 			
 			    .header-area p {
-			        font-size: clamp(16px, 1.3vw, 26px);
+			        font-size: 24px;
 			        color: #94A3B8;
 			        margin: 15px 0 0 0;
 			        font-weight: 400;
@@ -535,14 +535,14 @@ table KeyMeasures
 			    }
 			
 			    .card-title {
-			        font-size: clamp(20px, 1.6vw, 28px);
+			        font-size: 30px;
 			        font-weight: 600;
 			        color: #FFFFFF;
 			        margin: 0 0 10px 0;
 			    }
 			
 			    .card-desc {
-			        font-size: clamp(13px, 1vw, 17px);
+			        font-size: 18px;
 			        color: #94A3B8;
 			        line-height: 1.6;
 			        margin: 0;
@@ -560,7 +560,7 @@ table KeyMeasures
 			    }
 			
 			    .cta-text {
-			        font-size: clamp(16px, 1.2vw, 24px);
+			        font-size: 24px;
 			        font-weight: 500;
 			        color: #E2E8F0;
 			    }
@@ -568,7 +568,7 @@ table KeyMeasures
 			    .cta-btn {
 			        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
 			        color: #FFFFFF;
-			        font-size: clamp(16px, 1.2vw, 22px);
+			        font-size: 22px;
 			        font-weight: 600;
 			        padding: 2.2vh 3.8vw;
 			        border-radius: 40px;
