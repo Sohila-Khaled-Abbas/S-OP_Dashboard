@@ -61,8 +61,8 @@
             "position": "Outer",
             "preset": "Custom",
             "angle": 90,
-            "distance": 2,
-            "blur": 4,
+            "shadowDistance": 2,
+            "shadowBlur": 4,
             "transparency": 95
           }
         ],
@@ -74,16 +74,16 @@
           }
         ]
       }
-    },
-    "page": {
-      "*": {
-        "background": [
-          {
-            "color": { "solid": { "color": "#F9FAFB" } },
-            "transparency": 0
-          }
-        ]
-      }
+    }
+  },
+  "page": {
+    "*": {
+      "background": [
+        {
+          "color": { "solid": { "color": "#F9FAFB" } },
+          "transparency": 0
+        }
+      ]
     }
   }
 }
