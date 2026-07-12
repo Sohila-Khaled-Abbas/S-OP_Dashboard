@@ -1,0 +1,87 @@
+{
+  "name": "SOPTheme",
+  "dataColors": [
+    "#1E3A8A",
+    "#3B82F6",
+    "#7C3AED",
+    "#A78BFA",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#64748B"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1F2937",
+  "tableAccent": "#1E3A8A",
+  "textClasses": {
+    "callout": {
+      "fontSize": 24,
+      "fontFace": "Segoe UI",
+      "color": "#1E3A8A"
+    },
+    "title": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#111827"
+    },
+    "header": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#374151"
+    },
+    "body": {
+      "fontSize": 9,
+      "fontFace": "Segoe UI",
+      "color": "#4B5563"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#FFFFFF" } },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#E5E7EB" } },
+            "radius": 8
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#000000" } },
+            "position": "Outer",
+            "preset": "Custom",
+            "angle": 90,
+            "shadowDistance": 2,
+            "shadowBlur": 4,
+            "transparency": 95
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": true,
+            "background": { "solid": { "color": "#FFFFFF" } },
+            "foreground": { "solid": { "color": "#64748B" } }
+          }
+        ]
+      }
+    }
+  },
+  "page": {
+    "*": {
+      "background": [
+        {
+          "color": { "solid": { "color": "#F9FAFB" } },
+          "transparency": 0
+        }
+      ]
+    }
+  }
+}
