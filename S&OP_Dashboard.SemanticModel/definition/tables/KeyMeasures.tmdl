@@ -238,10 +238,6 @@ table KeyMeasures
 			VAR DotPosition = SEARCH(".", CurrentUserEmail, 1, 0)
 			VAR UserFirstName = IF(DotPosition > 0 && DotPosition < SEARCH("@", CurrentUserEmail, 1, 0), UPPER(LEFT(CurrentUserEmail, 1)) & MID(CurrentUserEmail, 2, DotPosition - 2), "Sohila")
 			
-			VAR MetricRevenue = FORMAT([Total Sales], "$#,##0")
-			VAR MetricOrders = FORMAT(COUNTROWS('FactSales'), "#,##0")
-			VAR MetricCampaigns = FORMAT(COUNTROWS('DimCampaign'), "#,##0")
-			VAR MetricStock = FORMAT(SUM('FactInventory'[Units]), "#,##0")
 			VAR RefreshDate = FORMAT(MAX('DimDate'[Date]), "MMMM DD, YYYY")
 			
 			RETURN
@@ -253,19 +249,13 @@ table KeyMeasures
 			    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 			    
 			    @keyframes fadeInUp {
-			        from { opacity: 0; transform: translateY(20px); }
+			        from { opacity: 0; transform: translateY(30px); }
 			        to { opacity: 1; transform: translateY(0); }
 			    }
 			    
-			    @keyframes float {
-			        0% { transform: translateY(0px); }
-			        50% { transform: translateY(-10px); }
-			        100% { transform: translateY(0px); }
-			    }
-			    
 			    @keyframes pulseGlow {
-			        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-			        70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+			        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+			        70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
 			        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 			    }
 			
@@ -276,8 +266,8 @@ table KeyMeasures
 			        height: 100%;
 			        background-color: #F9FAFB;
 			        background-image: 
-			            radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
-			            radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.04) 0%, transparent 40%);
+			            radial-gradient(circle at 15% 15%, rgba(30, 58, 138, 0.04) 0%, transparent 50%),
+			            radial-gradient(circle at 85% 85%, rgba(124, 58, 237, 0.03) 0%, transparent 50%);
 			        display: flex;
 			        align-items: stretch;
 			        justify-content: stretch;
@@ -290,95 +280,111 @@ table KeyMeasures
 			        display: flex;
 			        width: 100%;
 			        height: 100vh;
-			        background: rgba(255, 255, 255, 0.7);
-			        backdrop-filter: blur(20px);
-			        border: none;
-			        box-shadow: none;
+			        background: #F9FAFB;
 			        overflow: hidden;
 			        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 			    }
 			
-			    /* Sidebar info panel */
+			    /* Left Panel - Control Identity */
 			    .side-panel {
-			        width: 28%;
-			        background: linear-gradient(180deg, #1E3A8A 0%, #111827 100%);
-			        padding: 6vh 3vw;
+			        width: 30%;
+			        background: linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%);
+			        padding: 8vh 3.5vw;
 			        display: flex;
 			        flex-direction: column;
 			        justify-content: space-between;
 			        color: #FFFFFF;
 			        box-sizing: border-box;
+			        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+			        z-index: 5;
 			    }
 			
 			    .logo-area {
 			        display: flex;
 			        align-items: center;
-			        gap: 1vw;
+			        gap: 12px;
 			    }
 			
 			    .logo-icon {
-			        width: clamp(32px, 3vw, 48px);
-			        height: clamp(32px, 3vw, 48px);
+			        width: 54px;
+			        height: 54px;
 			        background: rgba(255, 255, 255, 0.1);
-			        border-radius: 10px;
+			        border-radius: 14px;
 			        display: flex;
 			        align-items: center;
 			        justify-content: center;
-			        font-size: clamp(16px, 1.5vw, 24px);
+			        font-size: 26px;
+			        border: 1px solid rgba(255, 255, 255, 0.15);
 			    }
 			
 			    .logo-text {
-			        font-size: clamp(14px, 1.3vw, 22px);
+			        font-size: 22px;
 			        font-weight: 700;
-			        letter-spacing: -0.5px;
+			        letter-spacing: 0.5px;
+			        color: #FFFFFF;
 			    }
 			
 			    .welcome-text {
-			        margin-top: 4vh;
+			        margin-top: 5vh;
 			    }
 			
 			    .welcome-text h2 {
-			        font-size: clamp(24px, 2.2vw, 36px);
+			        font-size: 42px;
 			        font-weight: 300;
 			        margin: 0;
-			        line-height: 1.2;
+			        line-height: 1.25;
+			        color: #E2E8F0;
 			    }
 			
 			    .welcome-text h2 strong {
 			        font-weight: 700;
 			        color: #60A5FA;
+			        display: block;
+			        font-size: 48px;
+			        margin-top: 5px;
 			    }
 			
 			    .welcome-desc {
-			        font-size: clamp(12px, 1vw, 16px);
-			        color: #9CA3AF;
-			        line-height: 1.6;
-			        margin-top: 2vh;
+			        font-size: 16px;
+			        color: #94A3B8;
+			        line-height: 1.7;
+			        margin-top: 25px;
 			    }
 			
 			    .system-status {
 			        margin-top: auto;
-			        background: rgba(255, 255, 255, 0.04);
+			        background: rgba(255, 255, 255, 0.03);
 			        border: 1px solid rgba(255, 255, 255, 0.08);
-			        border-radius: 16px;
-			        padding: 2vh;
+			        border-radius: 20px;
+			        padding: 24px;
+			        backdrop-filter: blur(10px);
+			    }
+			
+			    .status-title {
+			        font-size: 12px;
+			        font-weight: 700;
+			        text-transform: uppercase;
+			        letter-spacing: 1.5px;
+			        color: #60A5FA;
+			        margin-bottom: 15px;
 			    }
 			
 			    .status-row {
 			        display: flex;
 			        justify-content: space-between;
-			        font-size: clamp(11px, 0.8vw, 14px);
-			        margin-bottom: 1vh;
-			        color: #9CA3AF;
+			        align-items: center;
+			        font-size: 14px;
+			        margin-bottom: 12px;
+			        color: #94A3B8;
 			    }
 			
 			    .status-row:last-child { margin-bottom: 0; }
-			    .status-row strong { color: #FFFFFF; }
+			    .status-row strong { color: #FFFFFF; font-weight: 500; }
 			
-			    /* Main area with grid */
+			    /* Right Panel - Dashboard Portal */
 			    .main-panel {
 			        flex: 1;
-			        padding: 6vh 4vw;
+			        padding: 8vh 5vw;
 			        display: flex;
 			        flex-direction: column;
 			        justify-content: space-between;
@@ -386,65 +392,64 @@ table KeyMeasures
 			        overflow-y: auto;
 			    }
 			
-			    .header-area {
+			    .header-area h1 {
+			        font-size: 48px;
+			        font-weight: 700;
+			        color: #111827;
+			        margin: 0;
+			        letter-spacing: -1.5px;
+			    }
+			
+			    .header-area p {
+			        font-size: 18px;
+			        color: #4B5563;
+			        margin: 10px 0 0 0;
+			        font-weight: 400;
+			    }
+			
+			    /* Portal Directory Grid */
+			    .card-grid {
+			        display: grid;
+			        grid-template-columns: repeat(2, 1fr);
+			        gap: 30px;
+			        margin: 5vh 0;
+			    }
+			
+			    .card {
+			        background: #FFFFFF;
+			        border-radius: 24px;
+			        border: 1px solid #E5E7EB;
+			        padding: 35px;
+			        display: flex;
+			        flex-direction: column;
+			        justify-content: space-between;
+			        height: 240px;
+			        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+			        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+			        box-sizing: border-box;
+			        cursor: pointer;
+			    }
+			
+			    .card:hover {
+			        transform: translateY(-8px);
+			        box-shadow: 0 20px 40px rgba(30, 58, 138, 0.06);
+			        border-color: #3B82F6;
+			    }
+			
+			    .card-top {
 			        display: flex;
 			        justify-content: space-between;
 			        align-items: flex-start;
 			    }
 			
-			    .header-area h1 {
-			        font-size: clamp(28px, 2.6vw, 42px);
-			        font-weight: 700;
-			        color: #111827;
-			        margin: 0;
-			        letter-spacing: -1px;
-			    }
-			
-			    .header-area p {
-			        font-size: clamp(12px, 0.9vw, 15px);
-			        color: #6B7280;
-			        margin: 5px 0 0 0;
-			    }
-			
-			    /* Cards Grid */
-			    .card-grid {
-			        display: grid;
-			        grid-template-columns: repeat(2, 1fr);
-			        gap: 3vh 2vw;
-			        margin: 4vh 0;
-			    }
-			
-			    .card {
-			        background: #FFFFFF;
-			        border-radius: 20px;
-			        border: 1px solid #E5E7EB;
-			        padding: 3vh 2vw;
-			        display: flex;
-			        flex-direction: column;
-			        justify-content: space-between;
-			        height: 22vh;
-			        min-height: 140px;
-			        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
-			        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			        position: relative;
-			        box-sizing: border-box;
-			    }
-			
-			    .card:hover {
-			        transform: translateY(-5px);
-			        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-			        border-color: #3B82F6;
-			    }
-			
 			    .card-icon {
-			        width: clamp(36px, 3.5vw, 56px);
-			        height: clamp(36px, 3.5vw, 56px);
-			        border-radius: 12px;
+			        width: 56px;
+			        height: 56px;
+			        border-radius: 14px;
 			        display: flex;
 			        align-items: center;
 			        justify-content: center;
-			        font-size: clamp(18px, 1.8vw, 26px);
-			        margin-bottom: 2vh;
+			        font-size: 26px;
 			    }
 			
 			    .card:nth-child(1) .card-icon { background: rgba(59, 130, 246, 0.08); color: #3B82F6; }
@@ -452,20 +457,33 @@ table KeyMeasures
 			    .card:nth-child(3) .card-icon { background: rgba(124, 58, 237, 0.08); color: #7C3AED; }
 			    .card:nth-child(4) .card-icon { background: rgba(245, 158, 11, 0.08); color: #F59E0B; }
 			
-			    .card-num {
-			        font-size: clamp(24px, 2.4vw, 40px);
-			        font-weight: 700;
-			        color: #111827;
-			        margin: 0;
+			    .card-arrow {
+			        font-size: 20px;
+			        color: #9CA3AF;
+			        transition: transform 0.2s ease;
 			    }
 			
-			    .card-label {
-			        font-size: clamp(10px, 0.8vw, 13px);
+			    .card:hover .card-arrow {
+			        color: #3B82F6;
+			        transform: translateX(5px);
+			    }
+			
+			    .card-info {
+			        margin-top: 20px;
+			    }
+			
+			    .card-title {
+			        font-size: 22px;
 			        font-weight: 600;
+			        color: #111827;
+			        margin: 0 0 8px 0;
+			    }
+			
+			    .card-desc {
+			        font-size: 14px;
 			        color: #6B7280;
-			        text-transform: uppercase;
-			        letter-spacing: 1px;
-			        margin-top: 0.5vh;
+			        line-height: 1.5;
+			        margin: 0;
 			    }
 			
 			    /* Navigation & CTA */
@@ -474,12 +492,12 @@ table KeyMeasures
 			        align-items: center;
 			        justify-content: space-between;
 			        background: #F3F4F6;
-			        border-radius: 16px;
-			        padding: 2.5vh 2vw;
+			        border-radius: 20px;
+			        padding: 3vh 3vw;
 			    }
 			
 			    .cta-text {
-			        font-size: clamp(12px, 1vw, 16px);
+			        font-size: 18px;
 			        font-weight: 500;
 			        color: #374151;
 			    }
@@ -487,94 +505,107 @@ table KeyMeasures
 			    .cta-btn {
 			        background: #3B82F6;
 			        color: #FFFFFF;
-			        font-size: clamp(12px, 0.9vw, 15px);
+			        font-size: 16px;
 			        font-weight: 600;
-			        padding: 1.5vh 2.5vw;
+			        padding: 16px 36px;
 			        border-radius: 30px;
 			        cursor: pointer;
 			        border: none;
 			        animation: pulseGlow 2.5s infinite;
 			        transition: all 0.3s ease;
+			        letter-spacing: 0.5px;
 			    }
 			
 			    .cta-btn:hover {
 			        background: #2563EB;
+			        transform: scale(1.02);
 			    }
 			</style>
 			</head>
 			<body>
 			    <div class='container'>
-			        <!-- Sidebar Panel -->
+			        <!-- Sidebar Control Panel -->
 			        <div class='side-panel'>
 			            <div class='logo-area'>
 			                <div class='logo-icon'>📊</div>
-			                <span class='logo-text'>S&OP INTELLIGENCE</span>
+			                <span class='logo-text'>S&OP GATEWAY</span>
 			            </div>
 			            
 			            <div class='welcome-text'>
-			                <h2>Hello, <strong>" & UserFirstName & "</strong></h2>
-			                <p class='welcome-desc'>Welcome back to the S&OP Control Center. All local pipelines are active and fully synchronized. Enterprise demand forecasts, campaign spends, and logistics matrices are calculated and ready for visual analysis.</p>
+			                <h2>Welcome back, <strong>" & UserFirstName & "</strong></h2>
+			                <p class='welcome-desc'>Secure connection established. The enterprise analytical cubes and localized pipelines are synchronized. Choose a module from the launchpad to begin your session.</p>
 			            </div>
 			            
 			            <div class='system-status'>
+			                <div class='status-title'>System Metadata</div>
 			                <div class='status-row'>
-			                    <span>Data Source</span>
-			                    <strong>Local SQL Server</strong>
+			                    <span>Staging Environment</span>
+			                    <strong>Production</strong>
 			                </div>
 			                <div class='status-row'>
-			                    <span>Last Sync</span>
+			                    <span>Data Synchronization</span>
 			                    <strong>" & RefreshDate & "</strong>
 			                </div>
 			                <div class='status-row'>
-			                    <span>Pipeline Engine</span>
+			                    <span>Workspace Protocol</span>
 			                    <strong>DeepClean OS</strong>
 			                </div>
 			            </div>
 			        </div>
 			
-			        <!-- Main Content Panel -->
+			        <!-- Launchpad Directory -->
 			        <div class='main-panel'>
 			            <div class='header-area'>
-			                <div>
-			                    <h1>Executive Overview</h1>
-			                    <p>High-level key performance metrics across sales, inventory, and marketing divisions.</p>
-			                </div>
+			                <h1>S&OP Analytical Launchpad</h1>
+			                <p>Select a dashboard module to explore specialized omnichannel operations data.</p>
 			            </div>
 			
 			            <div class='card-grid'>
 			                <div class='card'>
-			                    <div class='card-icon'>💰</div>
-			                    <div>
-			                        <div class='card-num'>" & MetricRevenue & "</div>
-			                        <div class='card-label'>Total Sales Revenue</div>
+			                    <div class='card-top'>
+			                        <div class='card-icon'>📈</div>
+			                        <div class='card-arrow'>→</div>
+			                    </div>
+			                    <div class='card-info'>
+			                        <h3 class='card-title'>Executive Summary</h3>
+			                        <p class='card-desc'>High-level financial overview. Track sales performance, gross profit margins, and dynamic variance targets.</p>
 			                    </div>
 			                </div>
 			                <div class='card'>
-			                    <div class='card-icon'>📦</div>
-			                    <div>
-			                        <div class='card-num'>" & MetricOrders & "</div>
-			                        <div class='card-label'>Orders Processed</div>
+			                    <div class='card-top'>
+			                        <div class='card-icon'>👥</div>
+			                        <div class='card-arrow'>→</div>
+			                    </div>
+			                    <div class='card-info'>
+			                        <h3 class='card-title'>Demand & Customers</h3>
+			                        <p class='card-desc'>Deep-dive customer analytics. Analyze purchase channels, customer segmentations, and regional geographic maps.</p>
 			                    </div>
 			                </div>
 			                <div class='card'>
-			                    <div class='card-icon'>📢</div>
-			                    <div>
-			                        <div class='card-num'>" & MetricCampaigns & "</div>
-			                        <div class='card-label'>Marketing Campaigns</div>
+			                    <div class='card-top'>
+			                        <div class='card-icon'>📦</div>
+			                        <div class='card-arrow'>→</div>
+			                    </div>
+			                    <div class='card-info'>
+			                        <h3 class='card-title'>Inventory & Logistics</h3>
+			                        <p class='card-desc'>Operations and supply chain control. Monitor warehouse capacities, days of cover, and shipping status.</p>
 			                    </div>
 			                </div>
 			                <div class='card'>
-			                    <div class='card-icon'>📥</div>
-			                    <div>
-			                        <div class='card-num'>" & MetricStock & "</div>
-			                        <div class='card-label'>Stock Units (Qty)</div>
+			                    <div class='card-top'>
+			                        <div class='card-icon'>📢</div>
+			                        <div class='card-arrow'>→</div>
+			                    </div>
+			                    <div class='card-info'>
+			                        <h3 class='card-title'>Marketing & ROI</h3>
+			                        <p class='card-desc'>Marketing spend analysis. Evaluate click-through rates, active campaigns budget allocation, and conversion indexes.</p>
 			                    </div>
 			                </div>
 			            </div>
 			
 			            <div class='cta-area'>
-			                <span class='cta-text'>Ready to begin your data analysis session?</span>
-			                <button class='cta-btn'>Enter Dashboard</button>
+			                <span class='cta-text'>Ready to initialize the consolidated S&OP dashboard workspace?</span>
+			                <button class='cta-btn'>Launch Workspace</button>
 			            </div>
 			        </div>
 			    </div>
