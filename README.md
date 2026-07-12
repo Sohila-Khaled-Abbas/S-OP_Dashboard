@@ -165,17 +165,22 @@ To execute the parser locally:
 python scripts/generate_data_dictionary.py
 ```
 
-### ⚡ Power BI Modeling MCP Server Integration
-
-This project integrates the official Microsoft **Power BI Modeling MCP Server** at the workspace level.
-
-* **Configuration:** Saved in `.agents/mcp_config.json`.
-* **Capabilities:** Enables AI coding agents (such as Antigravity) to query DAX, edit measures, rename columns, and perform modeling operations directly on the semantic model using natural language via the local PBIP/TMDL files.
-* **Local LLM Integration (Ollama):** You can run this integration locally using Ollama models (e.g. `qwen2.5-coder:7b` or `llama3.1`).
+### ⚡ Power BI Modeling MCP Server & Web Interface
+ 
+This project integrates the official Microsoft **Power BI Modeling MCP Server** at the workspace level, coupled with a custom, locally-hosted web-based dashboard.
+ 
+* **Configuration:** Saved in `.agents/mcp_config.json` and `~/.cline/mcp.json` for Cline compatibility.
+* **Capabilities:** Enables AI coding agents to query DAX, edit measures, rename columns, and perform modeling operations directly on the semantic model using local files.
+* **Local Web Interface & LLM Integration (Ollama):** We have built a premium local web dashboard (FastAPI + Vanilla JS) for model exploration, running DAX queries, and talking with local Ollama models (e.g. `qwen2.5-coder:7b`).
   * Check the complete **[Power BI Modeling MCP + Ollama Integration Guide](file:///d:/courses/Data%20Science/Data%20Engineering/Projects/Omnichannel%20Sales%20&%20Operations%20%28S&OP%29%20Dashboard/docs/README_OLLAMA_MCP.md)** in the `docs` folder.
-  * Run the interactive CLI agent:
+  * **Option A: Run Web Dashboard (Recommended):**
     ```bash
-    # Activate virtual environment and run the client script
+    .venv\Scripts\Activate.ps1
+    python scripts/mcp_web_server.py
+    # Open http://localhost:8765 in your browser
+    ```
+  * **Option B: Run Interactive CLI Agent:**
+    ```bash
     .venv\Scripts\Activate.ps1
     python scripts/ollama_mcp_client.py
     ```
