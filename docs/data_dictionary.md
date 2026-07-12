@@ -17,7 +17,7 @@
 - **[FactPromotionCoverage](#factpromotioncoverage)** (Fact) — 2 Columns, 0 Measures
 - **[FactSales](#factsales)** (Fact) — 13 Columns, 0 Measures
 - **[FactSalesTargets](#factsalestargets)** (Fact) — 2 Columns, 0 Measures
-- **[KeyMeasures](#keymeasures)** (Fact) — 1 Columns, 31 Measures
+- **[KeyMeasures](#keymeasures)** (Fact) — 1 Columns, 33 Measures
 - **[Security](#security)** (Fact) — 2 Columns, 0 Measures
 
 ---
@@ -271,7 +271,9 @@
 | **`'Selected Period Sales'`** | `CALCULATE([Total Sales], ALLSELECTED(DimDate)) formatStri...` | - |
 | **`'Running Total Sales'`** | `CALCULATE( [Total Sales], FILTER( ALL(DimDate[Date]), Dim...` | - |
 | **`'Sales Rolling 3M'`** | `CALCULATE( [Total Sales], DATESINPERIOD(DimDate[Date], LA...` | - |
-| **`System_Metadata_HTML`** | `VAR LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "...` | - |
+| **`UI_4K_LandingPage_Refined`** | ````  // 1. Dynamic User Context VAR CurrentUserEmail = US...` | - |
+| **`LastRefreshDate`** | `FORMAT(LASTDATE('DimDate'[Date]), "MMMM DD, YYYY hh:mm AM...` | - |
+| **`ActiveCampaigns`** | `CALCULATE(COUNTROWS('DimCampaign')) formatString: 0 displ...` | - |
 
 ---
 
