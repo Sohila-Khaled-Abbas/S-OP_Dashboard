@@ -18,6 +18,11 @@
           }
         }
       }
+    ],
+    "outspace": [
+      {
+        "properties": {}
+      }
     ]
   },
   "visibility": "HiddenInViewMode"

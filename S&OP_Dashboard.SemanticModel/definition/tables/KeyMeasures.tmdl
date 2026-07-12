@@ -204,34 +204,6 @@ table KeyMeasures
 		displayFolder: 07_Dynamic & Context
 		lineageTag: a6b7c8d9-e0f1-2345-abcd-ef678901e0e1
 
-	measure System_Metadata_HTML =
-			
-			VAR LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "MMMM DD, YYYY hh:mm AM/PM")
-			VAR ActiveCampaigns = CALCULATE(COUNTROWS('DimCampaign'))
-			VAR TotalStock = FORMAT([Total Stock Units], "#,##0")
-			
-			RETURN
-			"<div style='font-family: Segoe UI, sans-serif; padding: 15px; background-color: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; box-shadow: 2px 2px 4px rgba(0,0,0,0.05);'>
-			    <h3 style='color: #1E3A8A; margin-top: 0; font-size: 16px; font-weight: 600;'>System & Data Status</h3>
-			    <hr style='border: none; border-top: 1px solid #E5E7EB; margin-bottom: 10px;' />
-			    <table style='width: 100%; font-size: 13px; color: #64748B; border-collapse: collapse;'>
-			        <tr>
-			            <td style='padding: 4px 0;'><strong>Last Data Refresh:</strong></td>
-			            <td style='text-align: right;'>" & LastRefreshDate & "</td>
-			        </tr>
-			        <tr>
-			            <td style='padding: 4px 0;'><strong>Active Marketing Campaigns:</strong></td>
-			            <td style='text-align: right;'>" & ActiveCampaigns & "</td>
-			        </tr>
-			        <tr>
-			            <td style='padding: 4px 0;'><strong>Monitored Stock Units:</strong></td>
-			            <td style='text-align: right;'>" & TotalStock & "</td>
-			        </tr>
-			    </table>
-			</div>"
-		displayFolder: 00_HTML & UI/UX
-		lineageTag: 46b23cd1-2143-4f3b-b047-089e6c96406a
-
 	measure UI_4K_LandingPage_Refined = ```
 			
 			// 1. Dynamic User Context
@@ -603,6 +575,19 @@ table KeyMeasures
 			```
 		displayFolder: 00_HTML & UI/UX
 		lineageTag: c24854a0-be84-4227-82e7-62895f2f823e
+
+	measure LastRefreshDate = FORMAT(LASTDATE('DimDate'[Date]), "MMMM DD, YYYY hh:mm AM/PM")
+		displayFolder: 00_HTML & UI/UX
+		lineageTag: 6eef320e-36df-47a5-bd0d-73e17494da2e
+
+	measure ActiveCampaigns = CALCULATE(COUNTROWS('DimCampaign'))
+		formatString: 0
+		displayFolder: 00_HTML & UI/UX
+		lineageTag: 7d5a537c-6af8-4aed-94ee-9258bfa896ef
+
+	measure TotalStock = FORMAT([Total Stock Units], "#,##0")
+		displayFolder: 00_HTML & UI/UX
+		lineageTag: 386b1d15-bdc8-499b-966f-ada41669f076
 
 	column Value
 		isHidden
