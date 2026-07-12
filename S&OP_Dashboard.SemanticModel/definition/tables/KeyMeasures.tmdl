@@ -249,26 +249,20 @@ table KeyMeasures
 			    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 			    
 			    @keyframes fadeInUp {
-			        from { opacity: 0; transform: translateY(40px); }
+			        from { opacity: 0; transform: translateY(50px); }
 			        to { opacity: 1; transform: translateY(0); }
 			    }
 			    
 			    @keyframes floatOrb {
 			        0% { transform: translateY(0px) scale(1); }
-			        50% { transform: translateY(-30px) scale(1.05); }
+			        50% { transform: translateY(-40px) scale(1.08); }
 			        100% { transform: translateY(0px) scale(1); }
 			    }
 			    
-			    @keyframes radarPulse {
-			        0% { transform: scale(0.9); opacity: 0.8; }
-			        50% { transform: scale(1.2); opacity: 0.4; }
-			        100% { transform: scale(1.4); opacity: 0; }
-			    }
-			
-			    @keyframes gradientBG {
-			        0% { background-position: 0% 50%; }
-			        50% { background-position: 100% 50%; }
-			        100% { background-position: 0% 50%; }
+			    @keyframes pulseGlow {
+			        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
+			        70% { box-shadow: 0 0 0 25px rgba(59, 130, 246, 0); }
+			        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 			    }
 			
 			    body {
@@ -276,242 +270,210 @@ table KeyMeasures
 			        padding: 0;
 			        width: 100%;
 			        height: 100%;
-			        background-color: #0F172A;
+			        background-color: #0B0F19;
 			        background-image: 
-			            radial-gradient(circle at 10% 20%, rgba(30, 58, 138, 0.15) 0%, transparent 40%),
-			            radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 40%);
+			            radial-gradient(circle at 10% 20%, rgba(30, 58, 138, 0.2) 0%, transparent 50%),
+			            radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%);
 			        display: flex;
-			        align-items: stretch;
-			        justify-content: stretch;
+			        flex-direction: column;
+			        align-items: center;
+			        justify-content: center;
 			        font-family: 'Outfit', 'Segoe UI', sans-serif;
 			        overflow: hidden;
 			        box-sizing: border-box;
 			        position: relative;
 			    }
 			
-			    /* Floating Decorative Orbs */
+			    /* Floating Neon Backdrop Orbs */
 			    .orb {
 			        position: absolute;
 			        border-radius: 50%;
-			        filter: blur(120px);
+			        filter: blur(140px);
 			        z-index: 1;
 			        pointer-events: none;
 			    }
 			
 			    .orb-1 {
-			        width: 600px;
-			        height: 600px;
-			        background: rgba(59, 130, 246, 0.15);
-			        top: -100px;
-			        left: 20%;
-			        animation: floatOrb 15s infinite ease-in-out;
+			        width: 800px;
+			        height: 800px;
+			        background: rgba(59, 130, 246, 0.18);
+			        top: -200px;
+			        left: 10%;
+			        animation: floatOrb 18s infinite ease-in-out;
 			    }
 			
 			    .orb-2 {
-			        width: 700px;
-			        height: 700px;
-			        background: rgba(124, 58, 237, 0.12);
-			        bottom: -150px;
-			        right: 15%;
-			        animation: floatOrb 20s infinite ease-in-out -5s;
+			        width: 900px;
+			        height: 900px;
+			        background: rgba(124, 58, 237, 0.14);
+			        bottom: -250px;
+			        right: 10%;
+			        animation: floatOrb 22s infinite ease-in-out -6s;
 			    }
 			
-			    .container {
+			    .orb-3 {
+			        width: 600px;
+			        height: 600px;
+			        background: rgba(16, 185, 129, 0.08);
+			        top: 30%;
+			        left: 45%;
+			        animation: floatOrb 25s infinite ease-in-out -12s;
+			    }
+			
+			    .wrapper {
 			        display: flex;
-			        width: 100%;
-			        height: 100vh;
-			        background: rgba(15, 23, 42, 0.85);
-			        backdrop-filter: blur(20px);
-			        overflow: hidden;
+			        flex-direction: column;
+			        justify-content: space-between;
+			        width: 92%;
+			        max-width: 1800px;
+			        height: 90vh;
 			        z-index: 2;
 			        box-sizing: border-box;
+			        animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 			    }
 			
-			    /* Left Panel - Control Identity */
-			    .side-panel {
-			        width: 32%;
-			        background: linear-gradient(180deg, #1E3A8A 0%, #0B0F19 100%);
-			        padding: 8vh 4vw;
+			    /* Top Header Bar */
+			    .header-bar {
 			        display: flex;
-			        flex-direction: column;
 			        justify-content: space-between;
+			        align-items: center;
+			        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+			        padding-bottom: 30px;
+			    }
+			
+			    .brand {
+			        display: flex;
+			        align-items: center;
+			        gap: 15px;
+			    }
+			
+			    .brand-icon {
+			        font-size: 32px;
+			    }
+			
+			    .brand-text {
+			        font-size: 26px;
+			        font-weight: 700;
+			        letter-spacing: 1px;
 			        color: #FFFFFF;
-			        box-sizing: border-box;
-			        border-right: 1px solid rgba(255, 255, 255, 0.08);
-			        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.2);
 			    }
 			
-			    .logo-area {
+			    .metadata-badges {
 			        display: flex;
-			        align-items: center;
-			        gap: 16px;
+			        gap: 15px;
 			    }
 			
-			    .logo-icon {
-			        width: 70px;
-			        height: 70px;
-			        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
-			        border-radius: 20px;
-			        display: flex;
-			        align-items: center;
-			        justify-content: center;
-			        font-size: 32px;
-			        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-			        position: relative;
-			    }
-			
-			    .logo-icon::after {
-			        content: '';
-			        position: absolute;
-			        inset: -4px;
-			        border: 2px solid rgba(59, 130, 246, 0.4);
-			        border-radius: 24px;
-			        animation: radarPulse 2s infinite ease-out;
-			    }
-			
-			    .logo-text {
-			        font-size: 32px;
-			        font-weight: 700;
-			        letter-spacing: 0.8px;
-			        background: linear-gradient(to right, #FFFFFF, #E2E8F0);
-			        -webkit-background-clip: text;
-			        -webkit-text-fill-color: transparent;
-			    }
-			
-			    .welcome-text {
-			        margin-top: 6vh;
-			    }
-			
-			    .welcome-text h2 {
-			        font-size: 48px;
-			        font-weight: 300;
-			        margin: 0;
-			        line-height: 1.25;
-			        color: #E2E8F0;
-			    }
-			
-			    .welcome-text h2 strong {
-			        font-weight: 700;
-			        color: #60A5FA;
-			        display: block;
-			        font-size: 64px;
-			        margin-top: 10px;
-			        letter-spacing: -1px;
-			        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
-			        -webkit-background-clip: text;
-			        -webkit-text-fill-color: transparent;
-			    }
-			
-			    .welcome-desc {
-			        font-size: 20px;
-			        color: #94A3B8;
-			        line-height: 1.8;
-			        margin-top: 30px;
-			    }
-			
-			    .system-status {
-			        margin-top: auto;
-			        background: rgba(15, 23, 42, 0.4);
+			    .badge {
+			        background: rgba(255, 255, 255, 0.03);
 			        border: 1px solid rgba(255, 255, 255, 0.08);
-			        border-radius: 24px;
-			        padding: 30px;
+			        border-radius: 50px;
+			        padding: 10px 24px;
+			        font-size: 15px;
+			        color: #94A3B8;
+			        display: flex;
+			        align-items: center;
+			        gap: 8px;
 			    }
 			
-			    .status-title {
+			    .badge strong {
+			        color: #FFFFFF;
+			        font-weight: 600;
+			    }
+			
+			    .dot {
+			        width: 8px;
+			        height: 8px;
+			        border-radius: 50%;
+			        background: #10B981;
+			        box-shadow: 0 0 10px #10B981;
+			    }
+			
+			    /* Hero Welcome Panel */
+			    .hero-panel {
+			        margin-top: 4vh;
+			        text-align: center;
+			    }
+			
+			    .hero-pre {
 			        font-size: 16px;
 			        font-weight: 700;
-			        text-transform: uppercase;
-			        letter-spacing: 2px;
 			        color: #38BDF8;
-			        margin-bottom: 20px;
+			        letter-spacing: 3px;
+			        text-transform: uppercase;
+			        margin-bottom: 12px;
 			    }
 			
-			    .status-row {
-			        display: flex;
-			        justify-content: space-between;
-			        align-items: center;
-			        font-size: 18px;
-			        margin-bottom: 15px;
-			        color: #94A3B8;
-			    }
-			
-			    .status-row:last-child { margin-bottom: 0; }
-			    .status-row strong { color: #FFFFFF; font-weight: 600; }
-			
-			    /* Right Panel - Dashboard Portal */
-			    .main-panel {
-			        flex: 1;
-			        padding: 8vh 6vw;
-			        display: flex;
-			        flex-direction: column;
-			        justify-content: space-between;
-			        box-sizing: border-box;
-			        overflow-y: auto;
-			    }
-			
-			    .header-area h1 {
+			    .hero-title {
 			        font-size: 64px;
-			        font-weight: 700;
+			        font-weight: 800;
 			        color: #FFFFFF;
 			        margin: 0;
 			        letter-spacing: -2px;
-			        background: linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%);
+			        line-height: 1.15;
+			    }
+			
+			    .hero-title strong {
+			        background: linear-gradient(135deg, #60A5FA 0%, #7C3AED 100%);
 			        -webkit-background-clip: text;
 			        -webkit-text-fill-color: transparent;
 			    }
 			
-			    .header-area p {
-			        font-size: 24px;
+			    .hero-desc {
+			        font-size: 20px;
 			        color: #94A3B8;
-			        margin: 15px 0 0 0;
-			        font-weight: 400;
+			        line-height: 1.6;
+			        margin: 15px auto 0 auto;
+			        max-width: 800px;
 			    }
 			
-			    /* Portal Directory Grid */
+			    /* Launchpad Cards Grid */
 			    .card-grid {
 			        display: grid;
-			        grid-template-columns: repeat(2, 1fr);
-			        gap: 35px;
-			        margin: 6vh 0;
+			        grid-template-columns: repeat(4, 1fr);
+			        gap: 30px;
+			        margin: 5vh 0;
 			    }
 			
 			    .card {
 			        background: rgba(30, 41, 59, 0.4);
 			        border-radius: 28px;
 			        border: 1px solid rgba(255, 255, 255, 0.05);
-			        padding: 40px;
+			        padding: 35px;
 			        display: flex;
 			        flex-direction: column;
 			        justify-content: space-between;
-			        height: 280px;
+			        height: 310px;
 			        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 			        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 			        box-sizing: border-box;
 			        cursor: pointer;
-			        position: relative;
 			    }
 			
 			    .card:hover {
-			        transform: translateY(-10px);
-			        box-shadow: 0 24px 48px rgba(59, 130, 246, 0.12);
-			        border-color: rgba(59, 130, 246, 0.4);
-			        background: rgba(30, 41, 59, 0.6);
+			        transform: translateY(-12px);
+			        background: rgba(30, 41, 59, 0.65);
 			    }
+			
+			    /* Neon Glow borders on hover based on type */
+			    .card:nth-child(1):hover { border-color: #3B82F6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15); }
+			    .card:nth-child(2):hover { border-color: #10B981; box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
+			    .card:nth-child(3):hover { border-color: #8B5CF6; box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15); }
+			    .card:nth-child(4):hover { border-color: #F59E0B; box-shadow: 0 20px 40px rgba(245, 158, 17, 0.15); }
 			
 			    .card-top {
 			        display: flex;
 			        justify-content: space-between;
-			        align-items: flex-start;
+			        align-items: center;
 			    }
 			
 			    .card-icon {
-			        width: 70px;
-			        height: 70px;
-			        border-radius: 20px;
+			        width: 64px;
+			        height: 64px;
+			        border-radius: 16px;
 			        display: flex;
 			        align-items: center;
 			        justify-content: center;
-			        font-size: 32px;
+			        font-size: 30px;
 			    }
 			
 			    .card:nth-child(1) .card-icon { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
@@ -520,162 +482,148 @@ table KeyMeasures
 			    .card:nth-child(4) .card-icon { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
 			
 			    .card-arrow {
-			        font-size: 26px;
+			        font-size: 24px;
 			        color: #475569;
 			        transition: all 0.3s ease;
 			    }
 			
 			    .card:hover .card-arrow {
-			        color: #60A5FA;
 			        transform: translateX(8px);
 			    }
+			    .card:nth-child(1):hover .card-arrow { color: #60A5FA; }
+			    .card:nth-child(2):hover .card-arrow { color: #34D399; }
+			    .card:nth-child(3):hover .card-arrow { color: #A78BFA; }
+			    .card:nth-child(4):hover .card-arrow { color: #FBBF24; }
 			
 			    .card-info {
-			        margin-top: 30px;
+			        margin-top: 25px;
 			    }
 			
 			    .card-title {
-			        font-size: 30px;
+			        font-size: 26px;
 			        font-weight: 600;
 			        color: #FFFFFF;
 			        margin: 0 0 10px 0;
 			    }
 			
 			    .card-desc {
-			        font-size: 18px;
+			        font-size: 15px;
 			        color: #94A3B8;
 			        line-height: 1.6;
 			        margin: 0;
 			    }
 			
-			    /* Navigation & CTA Launch area */
-			    .cta-area {
+			    /* Navigation & CTA launch area */
+			    .launch-area {
 			        display: flex;
+			        flex-direction: column;
 			        align-items: center;
-			        justify-content: space-between;
-			        background: rgba(30, 41, 59, 0.3);
-			        border: 1px solid rgba(255, 255, 255, 0.04);
-			        border-radius: 28px;
-			        padding: 4vh 3.5vw;
+			        margin-top: 2vh;
 			    }
 			
-			    .cta-text {
-			        font-size: 24px;
-			        font-weight: 500;
-			        color: #E2E8F0;
-			    }
-			
-			    .cta-btn {
-			        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+			    .launch-btn {
+			        background: linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%);
 			        color: #FFFFFF;
-			        font-size: 22px;
-			        font-weight: 600;
-			        padding: 2.2vh 3.8vw;
-			        border-radius: 40px;
+			        font-size: 20px;
+			        font-weight: 700;
+			        padding: 24px 70px;
+			        border-radius: 50px;
 			        cursor: pointer;
 			        border: none;
 			        animation: pulseGlow 3s infinite;
 			        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-			        letter-spacing: 0.5px;
-			        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+			        letter-spacing: 1px;
+			        box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+			        text-transform: uppercase;
 			    }
 			
-			    .cta-btn:hover {
-			        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
-			        transform: scale(1.03);
-			        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+			    .launch-btn:hover {
+			        transform: scale(1.05);
+			        box-shadow: 0 15px 40px rgba(124, 58, 237, 0.6);
 			    }
 			</style>
 			</head>
 			<body>
-			    <!-- Ambient Orbs -->
+			    <!-- Ambient Glowing Orbs -->
 			    <div class='orb orb-1'></div>
 			    <div class='orb orb-2'></div>
+			    <div class='orb orb-3'></div>
 			
-			    <div class='container'>
-			        <!-- Sidebar Control Panel -->
-			        <div class='side-panel'>
-			            <div class='logo-area'>
-			                <div class='logo-icon'>📊</div>
-			                <span class='logo-text'>S&OP GATEWAY</span>
+			    <div class='wrapper'>
+			        <!-- Top Header Bar -->
+			        <div class='header-bar'>
+			            <div class='brand'>
+			                <span class='brand-icon'>📊</span>
+			                <span class='brand-text'>S&OP INTELLIGENCE</span>
 			            </div>
-			            
-			            <div class='welcome-text'>
-			                <h2>Welcome back, <strong>" & UserFirstName & "</strong></h2>
-			                <p class='welcome-desc'>Secure connection established. The enterprise analytical cubes and localized pipelines are synchronized. Choose a module from the launchpad to begin your session.</p>
-			            </div>
-			            
-			            <div class='system-status'>
-			                <div class='status-title'>System Metadata</div>
-			                <div class='status-row'>
-			                    <span>Staging Environment</span>
-			                    <strong>Production</strong>
+			            <div class='metadata-badges'>
+			                <div class='badge'>
+			                    <span class='dot'></span>
+			                    Environment: <strong>Production</strong>
 			                </div>
-			                <div class='status-row'>
-			                    <span>Data Synchronization</span>
-			                    <strong>" & RefreshDate & "</strong>
+			                <div class='badge'>
+			                    Sync: <strong>" & RefreshDate & "</strong>
 			                </div>
-			                <div class='status-row'>
-			                    <span>Workspace Protocol</span>
-			                    <strong>DeepClean OS</strong>
+			                <div class='badge'>
+			                    Engine: <strong>DeepClean OS</strong>
 			                </div>
 			            </div>
 			        </div>
 			
-			        <!-- Launchpad Directory -->
-			        <div class='main-panel'>
-			            <div class='header-area'>
-			                <h1>S&OP Analytical Launchpad</h1>
-			                <p>Select a dashboard module to explore specialized omnichannel operations data.</p>
-			            </div>
+			        <!-- Hero Welcome Panel -->
+			        <div class='hero-panel'>
+			            <div class='hero-pre'>Control Center Active</div>
+			            <h1 class='hero-title'>Welcome back, <strong>" & UserFirstName & "</strong></h1>
+			            <p class='hero-desc'>Enterprise demand planning, customer channels, logistics status, and marketing ROI cubes have successfully updated. Select an operations portal below to begin analysis.</p>
+			        </div>
 			
-			            <div class='card-grid'>
-			                <div class='card'>
-			                    <div class='card-top'>
-			                        <div class='card-icon'>📈</div>
-			                        <div class='card-arrow'>→</div>
-			                    </div>
-			                    <div class='card-info'>
-			                        <h3 class='card-title'>Executive Summary</h3>
-			                        <p class='card-desc'>High-level financial overview. Track sales performance, gross profit margins, and dynamic variance targets.</p>
-			                    </div>
+			        <!-- Launchpad Directory Cards -->
+			        <div class='card-grid'>
+			            <div class='card'>
+			                <div class='card-top'>
+			                    <div class='card-icon'>📈</div>
+			                    <div class='card-arrow'>→</div>
 			                </div>
-			                <div class='card'>
-			                    <div class='card-top'>
-			                        <div class='card-icon'>👥</div>
-			                        <div class='card-arrow'>→</div>
-			                    </div>
-			                    <div class='card-info'>
-			                        <h3 class='card-title'>Demand & Customers</h3>
-			                        <p class='card-desc'>Deep-dive customer analytics. Analyze purchase channels, customer segmentations, and regional geographic maps.</p>
-			                    </div>
-			                </div>
-			                <div class='card'>
-			                    <div class='card-top'>
-			                        <div class='card-icon'>📦</div>
-			                        <div class='card-arrow'>→</div>
-			                    </div>
-			                    <div class='card-info'>
-			                        <h3 class='card-title'>Inventory & Logistics</h3>
-			                        <p class='card-desc'>Operations and supply chain control. Monitor warehouse capacities, days of cover, and shipping status.</p>
-			                    </div>
-			                </div>
-			                <div class='card'>
-			                    <div class='card-top'>
-			                        <div class='card-icon'>📢</div>
-			                        <div class='card-arrow'>→</div>
-			                    </div>
-			                    <div class='card-info'>
-			                        <h3 class='card-title'>Marketing & ROI</h3>
-			                        <p class='card-desc'>Marketing spend analysis. Evaluate click-through rates, active campaigns budget allocation, and conversion indexes.</p>
-			                    </div>
+			                <div class='card-info'>
+			                    <h3 class='card-title'>Executive Summary</h3>
+			                    <p class='card-desc'>High-level operations overview. Track aggregate sales revenues, gross margins, and dynamic variance targets.</p>
 			                </div>
 			            </div>
+			            <div class='card'>
+			                <div class='card-top'>
+			                    <div class='card-icon'>👥</div>
+			                    <div class='card-arrow'>→</div>
+			                    </div>
+			                <div class='card-info'>
+			                    <h3 class='card-title'>Demand & Customers</h3>
+			                    <p class='card-desc'>Detailed customer analytics. Deep dive into purchase channels, customer segmentations, and regional geographic maps.</p>
+			                </div>
+			            </div>
+			            <div class='card'>
+			                <div class='card-top'>
+			                    <div class='card-icon'>📦</div>
+			                    <div class='card-arrow'>→</div>
+			                </div>
+			                <div class='card-info'>
+			                    <h3 class='card-title'>Inventory & Logistics</h3>
+			                    <p class='card-desc'>Operations and supply chain control. Monitor warehouse capacities, days of cover, and shipping status.</p>
+			                </div>
+			            </div>
+			            <div class='card'>
+			                <div class='card-top'>
+			                    <div class='card-icon'>📢</div>
+			                    <div class='card-arrow'>→</div>
+			                </div>
+			                <div class='card-info'>
+			                    <h3 class='card-title'>Marketing & ROI</h3>
+			                    <p class='card-desc'>Marketing spend analysis. Evaluate click-through rates, active campaigns budget allocation, and conversion indexes.</p>
+			                </div>
+			            </div>
+			        </div>
 			
-			            <div class='cta-area'>
-			                <span class='cta-text'>Ready to initialize the consolidated S&OP dashboard workspace?</span>
-			                <button class='cta-btn'>Launch Workspace</button>
-			            </div>
+			        <!-- Center CTA area -->
+			        <div class='launch-area'>
+			            <button class='launch-btn'>Launch Workspace</button>
 			        </div>
 			    </div>
 			</body>
