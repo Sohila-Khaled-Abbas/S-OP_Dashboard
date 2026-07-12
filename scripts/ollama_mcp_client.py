@@ -199,6 +199,6 @@ async def run_chat_loop():
 if __name__ == "__main__":
     if sys.platform == "win32":
         # Configure event loop for subprocesses on Windows
-        asyncio.set_event_loop_policy(asyncio.WindowsProactiveEventLoopPolicy())
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
     
     asyncio.run(run_chat_loop())
