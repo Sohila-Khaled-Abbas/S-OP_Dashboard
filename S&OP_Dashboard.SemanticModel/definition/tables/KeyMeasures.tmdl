@@ -268,14 +268,13 @@ table KeyMeasures
 			    body {
 			        margin: 0;
 			        padding: 0;
-			        width: 100%;
-			        height: 100%;
+			        width: 100vw;
+			        height: 100vh;
 			        background-color: #0B0F19;
 			        background-image: 
 			            radial-gradient(circle at 10% 20%, rgba(30, 58, 138, 0.2) 0%, transparent 50%),
 			            radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%);
 			        display: flex;
-			        flex-direction: column;
 			        align-items: center;
 			        justify-content: center;
 			        font-family: 'Outfit', 'Segoe UI', sans-serif;
@@ -326,7 +325,8 @@ table KeyMeasures
 			        justify-content: space-between;
 			        width: 92%;
 			        max-width: 1800px;
-			        height: 90vh;
+			        height: 85vh;
+			        margin: auto;
 			        z-index: 2;
 			        box-sizing: border-box;
 			        animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
